@@ -19,6 +19,7 @@
       volumes:
         - ./backend:/app
         - /app/node_modules
+      command: ["npm", "run", "start:dev"]
 
     # 2. Le Frontend
     frontend:
@@ -35,6 +36,7 @@
       volumes:
         - ./frontend:/app
         - /app/node_modules
+      command: ["npm", "run", "dev"]
 
     # 3. La Base de Données
     db:
