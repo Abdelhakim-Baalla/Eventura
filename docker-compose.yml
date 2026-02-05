@@ -1,0 +1,75 @@
+  version: '3.8'
+
+  services:
+    # 1. Le Backend (NestJS)
+    backend:
+      build:
+        context: ./backend
+        dockerfile: Dockerfile
+      container_name: eventura-backend
+      ports:
+        - "3000:3000"
+      env_file:
+        - ./backend/.env
+      depends_on:
+        - db
+      networks:
+        - eventura-net
+      # Volume pour le hot-reload en dev
+      volumes:
+        - ./backend:/app
+        - /app/node_modules
+      command: ["npm", "run", "start:dev"]
+
+    # 2. Le Frontend
+    frontend:
+      build:
+        context: ./frontend
+        dockerfile: Dockerfile
+      container_name: eventura-frontend
+      ports:
+        - "3001:3000"
+      env_file:
+        - ./frontend/.env
+      networks:
+        - eventura-net
+      volumes:
+        - ./frontend:/app
+        - /app/node_modules
+      command: ["npm", "run", "dev"]
+
+    adminer:
+      image: adminer:latest
+      container_name: eventura-adminer
+      restart: always
+      ports:
+        - "8080:8080"
+      networks:
+        - eventura-net
+      depends_on:
+        - db
+
+    # 3. La Base de Données
+    db:
+      build:
+        context: ./database
+        dockerfile: Dockerfile
+      container_name: eventura-db
+      restart: always
+      environment:
+        POSTGRES_USER: ${POSTGRES_USER:-admin}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eventura_pwd}
+        POSTGRES_DB: ${POSTGRES_DB:-eventura_db}
+      ports:
+        - "5432:5432"
+      volumes:
+        - pg_data:/var/lib/postgresql/data
+      networks:
+        - eventura-net
+
+  networks:
+    eventura-net:
+      driver: bridge
+
+  volumes:
+    pg_data:
