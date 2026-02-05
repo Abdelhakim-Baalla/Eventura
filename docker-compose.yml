@@ -38,6 +38,17 @@
         - /app/node_modules
       command: ["npm", "run", "dev"]
 
+    adminer:
+      image: adminer:latest
+      container_name: eventura-adminer
+      restart: always
+      ports:
+        - "8080:8080"
+      networks:
+        - eventura-net
+      depends_on:
+        - db
+
     # 3. La Base de Données
     db:
       build:
