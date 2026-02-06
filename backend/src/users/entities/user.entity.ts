@@ -1,5 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
-import { Reservation } from '../../reservations/entities/reservation.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  OneToMany,
+} from 'typeorm';
+import { Reservation } from './reservation.entity';
 
 export enum Role {
   SUPER_ADMIN = 'SUPER_ADMIN',
@@ -24,4 +30,18 @@ export class User {
   @Column()
   password: string;
 
-@Column({
+  @Column({ nullable: true })
+  telephone: string;
+
+  @Column({ type: 'enum', enum: Role, default: Role.PARTICIPANT })
+  role: Role;
+
+  @Column({ default: true })
+  estActif: boolean;
+
+  @CreateDateColumn()
+  dateCreation: Date;
+
+  @OneToMany(() => Reservation, (reservation) => reservation.utilisateur)
+  reservations: Reservation[];
+}
