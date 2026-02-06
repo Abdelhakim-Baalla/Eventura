@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { Role } from '../common/enums/role.enum';
+import { Role } from '../../common/enums/role.enum';
 import { Reservation } from './reservation.entity';
 
 @Entity('utilisateurs')

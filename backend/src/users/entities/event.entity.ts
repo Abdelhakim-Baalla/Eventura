@@ -7,7 +7,7 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { StatutEvenement } from '../common/enums/statut-evenement.enum';
+import { StatutEvenement } from '../../common/enums/statut-evenement.enum';
 import { User } from './user.entity';
 import { Category } from './category.entity';
 import { Reservation } from './reservation.entity';

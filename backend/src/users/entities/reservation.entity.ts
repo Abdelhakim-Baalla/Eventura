@@ -7,7 +7,7 @@ import {
   JoinColumn,
   Unique,
 } from 'typeorm';
-import { StatutReservation } from '../common/enums/statut-reservation.enum';
+import { StatutReservation } from '../../common/enums/statut-reservation.enum';
 import { User } from './user.entity';
 import { Event } from './event.entity';
 
