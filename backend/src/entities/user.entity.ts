@@ -5,13 +5,8 @@ import {
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { Role } from '../common/enums/role.enum';
 import { Reservation } from './reservation.entity';
-
-export enum Role {
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  ADMIN = 'ADMIN',
-  PARTICIPANT = 'PARTICIPANT',
-}
 
 @Entity('utilisateurs')
 export class User {
@@ -36,10 +31,10 @@ export class User {
   @Column({ type: 'enum', enum: Role, default: Role.PARTICIPANT })
   role: Role;
 
-  @Column({ default: true })
+  @Column({ default: true, name: 'est_actif' })
   estActif: boolean;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'date_creation' })
   dateCreation: Date;
 
   @OneToMany(() => Reservation, (reservation) => reservation.utilisateur)

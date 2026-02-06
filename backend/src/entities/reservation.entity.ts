@@ -7,15 +7,9 @@ import {
   JoinColumn,
   Unique,
 } from 'typeorm';
+import { StatutReservation } from '../common/enums/statut-reservation.enum';
 import { User } from './user.entity';
 import { Event } from './event.entity';
-
-export enum StatutReservation {
-  EN_ATTENTE = 'EN_ATTENTE',
-  CONFIRME = 'CONFIRME',
-  REFUSE = 'REFUSE',
-  ANNULE = 'ANNULE',
-}
 
 @Entity('reservations')
 @Unique(['utilisateurId', 'evenementId'])
@@ -23,10 +17,10 @@ export class Reservation {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'utilisateur_id' })
   utilisateurId: string;
 
-  @Column()
+  @Column({ name: 'evenement_id' })
   evenementId: string;
 
   @Column({
@@ -36,22 +30,26 @@ export class Reservation {
   })
   statut: StatutReservation;
 
-  @Column({ unique: true, length: 50 })
+  @Column({ unique: true, length: 50, name: 'reference_ticket' })
   referenceTicket: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'date_reservation' })
   dateReservation: Date;
 
-  @Column({ type: 'timestamp with time zone', nullable: true })
+  @Column({
+    type: 'timestamp with time zone',
+    nullable: true,
+    name: 'date_confirmation',
+  })
   dateConfirmation: Date;
 
   @ManyToOne(() => User, (user) => user.reservations, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'utilisateurId' })
+  @JoinColumn({ name: 'utilisateur_id' })
   utilisateur: User;
 
   @ManyToOne(() => Event, (event) => event.reservations, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'evenementId' })
+  @JoinColumn({ name: 'evenement_id' })
   evenement: Event;
 }
