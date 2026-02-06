@@ -1,5 +1,10 @@
 # 📝 Guide de Documentation Technique : Eventura
 
+![Backend CI](https://github.com/Abdelhakim-Baalla/Eventura/workflows/Backend%20CI/badge.svg)
+![Frontend CI](https://github.com/Abdelhakim-Baalla/Eventura/workflows/Frontend%20CI/badge.svg)
+![Docker CD](https://github.com/Abdelhakim-Baalla/Eventura/workflows/Docker%20CD/badge.svg)
+[![codecov](https://codecov.io/gh/Abdelhakim-Baalla/Eventura/branch/main/graph/badge.svg)](https://codecov.io/gh/Abdelhakim-Baalla/Eventura)
+
 ## 1. Présentation du Projet
 
 **Nom :** Eventura
