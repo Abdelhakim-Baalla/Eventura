@@ -15,7 +15,7 @@ import { User } from '../users/entities/user.entity';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET') || 'secret-key-dev',
         signOptions: {
-          expiresIn: '1d',
+          expiresIn: '7d',
         },
       }),
     }),

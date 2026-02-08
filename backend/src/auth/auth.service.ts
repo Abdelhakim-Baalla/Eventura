@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
@@ -16,6 +17,7 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private jwtService: JwtService,
   ) {}
 
   async register(
@@ -50,7 +52,9 @@ export class AuthService {
     };
   }
 
-  async login(loginDto: LoginDto): Promise<{ user: Partial<User> }> {
+  async login(
+    loginDto: LoginDto,
+  ): Promise<{ access_token: string; user: Partial<User> }> {
     const { email, password } = loginDto;
 
     const user = await this.userRepository.findOne({
@@ -67,7 +71,18 @@ export class AuthService {
       throw new UnauthorizedException('Identifiants invalides');
     }
 
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const access_token = await this.jwtService.signAsync(payload);
+
     const { password: _, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword };
+    return {
+      access_token,
+      user: userWithoutPassword,
+    };
   }
 }
