@@ -7,6 +7,7 @@ import { User } from './users/entities/user.entity';
 import { Category } from './users/entities/category.entity';
 import { Event } from './users/entities/event.entity';
 import { Reservation } from './users/entities/reservation.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { Reservation } from './users/entities/reservation.entity';
       synchronize: true,
       logging: true,
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
