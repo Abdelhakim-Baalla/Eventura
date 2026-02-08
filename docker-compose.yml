@@ -57,11 +57,11 @@
       container_name: eventura-db
       restart: always
       environment:
-        POSTGRES_USER: ${POSTGRES_USER:-admin}
-        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eventura_pwd}
-        POSTGRES_DB: ${POSTGRES_DB:-eventura_db}
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: eventura_pwd
+        POSTGRES_DB: eventura_db
       ports:
-        - "5432:5432"
+        - "5433:5432"
       volumes:
         - pg_data:/var/lib/postgresql/data
       networks:
