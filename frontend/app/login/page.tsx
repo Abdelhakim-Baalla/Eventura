@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { authService } from '@/lib/auth';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -46,9 +47,9 @@ export default function LoginPage() {
 
             const data = await response.json();
 
-            // TODO: Stocker le token (EV-43)
-            console.log('Token reçu:', data.access_token);
-            console.log('Utilisateur:', data.user);
+            // Stocker le token et l'utilisateur
+            authService.setToken(data.access_token);
+            authService.setUser(data.user);
 
             // Redirection vers le dashboard
             router.push('/dashboard');
