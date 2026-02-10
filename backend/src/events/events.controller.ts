@@ -32,6 +32,7 @@ export class EventsController {
     return this.eventsService.findAllPublished();
   }
 
+  @Public()
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.eventsService.findOne(id);
