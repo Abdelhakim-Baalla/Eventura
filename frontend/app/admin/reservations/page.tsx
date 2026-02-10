@@ -3,184 +3,127 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 
-interface Reservation {
-    id: string;
-    referenceTicket: string;
-    statut: string;
-    dateReservation: string;
-    evenement: {
-        id: string;
-        titre: string;
-    };
-    utilisateur: {
-        nom: string;
-        email: string;
-    };
-}
+const Icons = {
+    Search: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>,
+    User: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
+    Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>,
+    X: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>,
+};
 
 export default function AdminReservationsPage() {
-    const [reservations, setReservations] = useState<Reservation[]>([]);
+    const [reservations, setReservations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filterStatus, setFilterStatus] = useState('ALL');
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        fetchReservations();
+        loadReservations();
     }, []);
 
-    const fetchReservations = async () => {
-        setLoading(true);
+    const loadReservations = () => {
+        api.get('/reservations/admin').then(res => { setReservations(res.data); setLoading(false); }).catch(() => setLoading(false));
+    };
+
+    const handleUpdateStatus = async (id: string, statut: string) => {
         try {
-            const res = await api.get('/reservations/admin');
-            setReservations(res.data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
+            await api.patch(`/reservations/${id}/status`, { statut });
+            loadReservations();
+        } catch (err) { alert('Erreur lors de la mise à jour'); }
     };
 
-    const handleUpdateStatus = async (id: string, newStatus: string) => {
-        try {
-            await api.patch(`/reservations/${id}/status`, { statut: newStatus });
-            setReservations(prev => prev.map(r => r.id === id ? { ...r, statut: newStatus } : r));
-        } catch (err: any) {
-            alert(err.response?.data?.message || 'Erreur lors de la mise à jour');
-        }
-    };
+    const filtered = reservations.filter(r =>
+        r.utilisateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.evenement.titre.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    const filteredReservations = reservations.filter(res => {
-        const matchesStatus = filterStatus === 'ALL' || res.statut === filterStatus;
-        const matchesSearch = res.utilisateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            res.evenement.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            res.referenceTicket.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesStatus && matchesSearch;
-    });
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'CONFIRME': return 'bg-green-100 text-green-800';
-            case 'EN_ATTENTE': return 'bg-yellow-100 text-yellow-800';
-            case 'REFUSE': return 'bg-red-100 text-red-800';
-            case 'ANNULE': return 'bg-gray-100 text-gray-800';
-            default: return 'bg-blue-100 text-blue-800';
-        }
-    };
+    if (loading) return (
+        <div className="flex h-[40vh] items-center justify-center">
+            <div className="w-10 h-10 border-2 border-admin-border border-t-admin-accent rounded-full animate-spin"></div>
+        </div>
+    );
 
     return (
-        <div className="p-8 text-black">
-            <header className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-2xl font-bold">Gestion des Réservations</h1>
-                    <p className="text-gray-500">Validez ou gérez les inscriptions à vos événements</p>
+        <div className="space-y-12">
+            <div className="flex justify-between items-end">
+                <div className="space-y-1">
+                    <h1 className="text-6xl font-black text-admin-text-main tracking-tighter uppercase italic">Flux</h1>
+                    <p className="text-admin-text-dim font-bold text-xs uppercase tracking-[0.3em] px-1">Audit des Transmissions de données</p>
                 </div>
-                <button onClick={fetchReservations} className="p-2 text-blue-600 hover:bg-blue-50 rounded">
-                    🔄 Actualiser
-                </button>
-            </header>
-
-            {/* Filtres */}
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="flex-1">
-                    <input
-                        type="text"
-                        placeholder="Rechercher (Participant, Événement, Ticket...)"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full border rounded-lg p-2"
-                    />
-                </div>
-                <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="border rounded-lg p-2"
-                >
-                    <option value="ALL">Tous les statuts</option>
-                    <option value="EN_ATTENTE">En attente</option>
-                    <option value="CONFIRME">Confirmé</option>
-                    <option value="REFUSE">Refusé</option>
-                    <option value="ANNULE">Annulé</option>
-                </select>
             </div>
 
-            {loading ? (
-                <div className="flex justify-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="relative group max-w-2xl">
+                <div className="absolute left-8 top-1/2 -translate-y-1/2 text-admin-text-dim group-focus-within:text-admin-accent transition-colors">
+                    <Icons.Search />
                 </div>
-            ) : (
-                <div className="bg-white border rounded-xl overflow-hidden shadow-sm">
-                    <table className="w-full text-left">
-                        <thead className="bg-gray-50 border-b">
-                            <tr>
-                                <th className="px-6 py-4 font-bold text-sm">Participant</th>
-                                <th className="px-6 py-4 font-bold text-sm">Événement</th>
-                                <th className="px-6 py-4 font-bold text-sm">Date Rés.</th>
-                                <th className="px-6 py-4 font-bold text-sm">Statut</th>
-                                <th className="px-6 py-4 font-bold text-sm text-right">Actions</th>
+                <input
+                    type="text"
+                    placeholder="Scanner identifiants ou protocoles..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full bg-admin-card border border-admin-border rounded-[2rem] py-8 pl-20 pr-8 text-sm font-black text-admin-text-main uppercase tracking-widest focus:border-admin-accent/50 outline-none transition-all shadow-2xl placeholder:italic placeholder:opacity-30"
+                />
+            </div>
+
+            <div className="bg-admin-card rounded-[3.5rem] border border-admin-border overflow-hidden shadow-2xl">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-admin-inner/50 border-b border-admin-border text-admin-text-dim text-[10px] uppercase font-black tracking-[0.4em]">
+                                <th className="px-12 py-8">Source Identité</th>
+                                <th className="px-12 py-8">Cible Unit</th>
+                                <th className="px-12 py-8">Statut Flux</th>
+                                <th className="px-12 py-8 text-right">Contrôle / Signature</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
-                            {filteredReservations.map(res => (
-                                <tr key={res.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4">
-                                        <div className="font-bold">{res.utilisateur.nom}</div>
-                                        <div className="text-xs text-gray-400">{res.utilisateur.email}</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="max-w-[200px] truncate" title={res.evenement.titre}>
-                                            {res.evenement.titre}
+                        <tbody className="divide-y divide-admin-border/50">
+                            {filtered.map((r) => (
+                                <tr key={r.id} className="hover:bg-admin-inner/30 transition-all group">
+                                    <td className="px-12 py-10">
+                                        <div className="flex items-center gap-6">
+                                            <div className="w-14 h-14 bg-admin-inner rounded-xl border border-admin-border flex items-center justify-center text-admin-accent shadow-inner group-hover:bg-admin-accent group-hover:text-admin-bg transition-all">
+                                                <Icons.User />
+                                            </div>
+                                            <div>
+                                                <div className="text-lg font-black text-admin-text-main tracking-tighter uppercase italic group-hover:text-admin-accent transition-colors">{r.utilisateur.nom}</div>
+                                                <div className="text-[10px] font-bold text-admin-text-dim tracking-widest uppercase">{r.utilisateur.email}</div>
+                                            </div>
                                         </div>
-                                        <div className="text-[10px] font-mono text-blue-500 uppercase">{res.referenceTicket}</div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm">
-                                        {new Date(res.dateReservation).toLocaleDateString()}
+                                    <td className="px-12 py-10">
+                                        <div className="text-sm font-black text-admin-text-muted italic group-hover:text-admin-text-main transition-colors">{r.evenement.titre}</div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${getStatusColor(res.statut)}`}>
-                                            {res.statut}
+                                    <td className="px-12 py-10">
+                                        <span className={`px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border ${r.statut === 'CONFIRME'
+                                            ? 'bg-status-success/5 text-status-success border-status-success/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+                                            : r.statut === 'REFUSE' || r.statut === 'ANNULE'
+                                                ? 'bg-status-error/5 text-status-error border-status-error/20'
+                                                : 'bg-admin-inner text-admin-text-dim border-admin-border'
+                                            }`}>
+                                            {r.statut}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            {res.statut === 'EN_ATTENTE' && (
-                                                <>
-                                                    <button
-                                                        onClick={() => handleUpdateStatus(res.id, 'CONFIRME')}
-                                                        className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                                                    >
-                                                        Confirmer
+                                    <td className="px-12 py-10 text-right">
+                                        <div className="flex items-center justify-end gap-6">
+                                            {r.statut === 'EN_ATTENTE' && (
+                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                                    <button onClick={() => handleUpdateStatus(r.id, 'CONFIRME')} className="w-10 h-10 flex items-center justify-center bg-admin-inner border border-admin-border rounded-xl text-status-success hover:bg-status-success hover:text-white transition-all">
+                                                        <Icons.Check />
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleUpdateStatus(res.id, 'REFUSE')}
-                                                        className="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                                                    >
-                                                        Refuser
+                                                    <button onClick={() => handleUpdateStatus(r.id, 'REFUSE')} className="w-10 h-10 flex items-center justify-center bg-admin-inner border border-admin-border rounded-xl text-status-error hover:bg-status-error hover:text-white transition-all">
+                                                        <Icons.X />
                                                     </button>
-                                                </>
+                                                </div>
                                             )}
-                                            {res.statut === 'CONFIRME' && (
-                                                <button
-                                                    onClick={() => handleUpdateStatus(res.id, 'ANNULE')}
-                                                    className="text-xs text-gray-500 hover:text-red-600 font-medium"
-                                                >
-                                                    Annuler
-                                                </button>
-                                            )}
+                                            <span className="font-mono text-xs text-admin-accent font-black tracking-tighter">
+                                                {r.referenceTicket}
+                                            </span>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
-                            {filteredReservations.length === 0 && (
-                                <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500 italic">
-                                        Aucune réservation trouvée
-                                    </td>
-                                </tr>
-                            )}
                         </tbody>
                     </table>
                 </div>
-            )}
+            </div>
         </div>
     );
 }

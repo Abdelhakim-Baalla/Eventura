@@ -1,4 +1,4 @@
-import { Controller, Post, Put, Body, Param, Request, Get, Patch } from '@nestjs/common';
+import { Controller, Post, Put, Body, Param, Request, Get, Patch, Delete } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -71,5 +71,11 @@ export class EventsController {
   @Patch(':id/cancel')
   async cancel(@Param('id') id: string) {
     return this.eventsService.cancel(id);
+  }
+
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return this.eventsService.remove(id);
   }
 }

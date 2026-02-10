@@ -5,19 +5,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import Link from 'next/link';
 
-interface Event {
-    id: string;
-    titre: string;
-    description: string;
-    dateHeureDebut: string;
-    dateHeureFin: string;
-    lieu: string;
-    prix: number;
-    capaciteMax: number;
-    placesRestantes: number;
-    categorie: { nom: string };
-    image?: string;
-}
+interface Event { id: string; titre: string; description: string; dateHeureDebut: string; dateHeureFin: string; lieu: string; prix: number; capaciteMax: number; placesRestantes: number; categorie: { nom: string }; imageAffiche?: string; }
 
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -27,134 +15,109 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     const [reserving, setReserving] = useState(false);
 
     useEffect(() => {
-        api.get(`/events/${id}`)
-            .then(res => setEvent(res.data))
-            .catch(err => console.error(err))
-            .finally(() => setLoading(false));
+        api.get(`/events/${id}`).then(res => setEvent(res.data)).catch(err => console.error(err)).finally(() => setLoading(false));
     }, [id]);
 
     const handleReserve = async () => {
-        if (!confirm('Confirmer votre réservation pour cet événement ?')) return;
-
+        if (!confirm('Rejoindre cet événement ?')) return;
         setReserving(true);
         try {
             await api.post('/reservations', { evenementId: id });
-            alert('Réservation réussie ! Votre place est confirmée.');
             router.push('/reservations');
-        } catch (err: any) {
-            if (err.response?.status === 401) {
-                router.push('/login');
-            } else {
-                alert(err.response?.data?.message || 'Une erreur est survenue.');
-            }
-        } finally {
-            setReserving(false);
         }
+        catch (err: any) {
+            if (err.response?.status === 401) router.push('/login');
+            else alert(err.response?.data?.message || 'Erreur lors de la réservation');
+        }
+        finally { setReserving(false); }
     };
 
     if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-white">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="min-h-screen flex items-center justify-center bg-site-bg">
+            <div className="w-10 h-10 border-2 border-site-border border-t-site-accent rounded-full animate-spin"></div>
         </div>
     );
 
     if (!event) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-white text-black">
-            <h1 className="text-2xl font-bold mb-4">Événement introuvable</h1>
-            <Link href="/" className="text-blue-600 hover:underline">Retour à l'accueil</Link>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-site-bg text-site-text-main p-12 text-center space-y-4">
+            <h1 className="text-4xl font-black uppercase italic">Événement introuvable.</h1>
+            <Link href="/" className="text-site-accent font-black uppercase tracking-widest text-xs hover:underline">Retour au catalogue</Link>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 text-black">
-            {/* Header / Nav */}
-            <nav className="bg-white shadow-sm border-b sticky top-0 z-10">
-                <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link href="/" className="text-blue-600 font-bold">← Retour</Link>
-                    <span className="font-semibold truncate max-w-[200px]">{event.titre}</span>
-                    <div className="w-10"></div> {/* Spacer */}
+        <div className="min-h-screen bg-site-bg text-site-text-main font-sans selection:bg-site-accent selection:text-white pb-32">
+            <nav className="h-16 bg-site-bg/90 backdrop-blur-md border-b border-site-border flex items-center sticky top-0 z-50 px-6 lg:px-12">
+                <div className="max-w-6xl mx-auto w-full flex items-center justify-between">
+                    <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-site-text-muted hover:text-white transition-all flex items-center gap-2 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6" /></svg>
+                        Retour
+                    </Link>
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-site-text-muted italic opacity-50 truncate max-w-xs">{event.titre}</span>
+                    <div className="w-20"></div>
                 </div>
             </nav>
 
-            <main className="max-w-4xl mx-auto px-4 py-8">
-                {/* Image & Main Info */}
-                <div className="bg-white rounded-2xl shadow-sm border overflow-hidden mb-8">
-                    <div className="h-64 sm:h-96 bg-gray-200">
-                        {event.image ? (
-                            <img src={event.image} alt={event.titre} className="w-full h-full object-cover" />
+            <main className="max-w-6xl mx-auto px-6 pt-12">
+                <div className="bg-site-card rounded-3xl border border-site-border overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[500px]">
+                    <div className="md:w-1/2 relative bg-site-inner overflow-hidden border-r border-site-border">
+                        {event.imageAffiche ? (
+                            <img src={event.imageAffiche} alt={event.titre} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">Pas d'image</div>
+                            <div className="w-full h-full flex items-center justify-center text-site-text-dim text-[10px] font-black uppercase tracking-widest opacity-20">No Visual</div>
                         )}
+                        <div className="absolute top-6 left-6 bg-site-accent text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/20 shadow-xl shadow-site-accent/20">
+                            {event.categorie?.nom}
+                        </div>
                     </div>
 
-                    <div className="p-6 sm:p-10">
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                {event.categorie?.nom}
-                            </span>
-                        </div>
-
-                        <h1 className="text-3xl sm:text-4xl font-black mb-6">{event.titre}</h1>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 text-gray-700">
-                            <div className="flex items-center gap-3">
-                                <span className="text-2xl">📅</span>
-                                <div>
-                                    <p className="font-bold">Date et heure</p>
-                                    <p className="text-sm">Début : {new Date(event.dateHeureDebut).toLocaleString()}</p>
-                                    <p className="text-sm">Fin : {new Date(event.dateHeureFin).toLocaleString()}</p>
+                    <div className="md:w-1/2 p-10 md:p-16 space-y-12 flex flex-col">
+                        <div className="space-y-6">
+                            <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic leading-[0.9]">{event.titre}</h1>
+                            <div className="grid grid-cols-2 gap-8 py-6 border-y border-site-border">
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black text-site-text-muted uppercase tracking-widest opacity-60 italic">Date & Heure</p>
+                                    <p className="text-sm font-black text-site-text-main italic">{new Date(event.dateHeureDebut).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                                    <p className="text-xs font-bold text-site-accent">{new Date(event.dateHeureDebut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <span className="text-2xl">📍</span>
-                                <div>
-                                    <p className="font-bold">Lieu</p>
-                                    <p className="text-sm">{event.lieu}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <span className="text-2xl">👥</span>
-                                <div>
-                                    <p className="font-bold">Places disponibles</p>
-                                    <p className={`text-sm font-bold ${event.placesRestantes < 10 ? 'text-red-500' : 'text-green-600'}`}>
-                                        {event.placesRestantes} / {event.capaciteMax} restantes
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <span className="text-2xl">💰</span>
-                                <div>
-                                    <p className="font-bold">Prix</p>
-                                    <p className="text-xl font-black text-blue-600">{event.prix === 0 ? 'Gratuit' : `${event.prix} €`}</p>
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black text-site-text-muted uppercase tracking-widest opacity-60 italic">Lieu</p>
+                                    <p className="text-sm font-black text-site-text-main italic uppercase tracking-tight">{event.lieu}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="border-t pt-8">
-                            <h2 className="text-xl font-bold mb-4">À propos de cet événement</h2>
-                            <div className="prose max-w-none text-gray-800 whitespace-pre-wrap">
-                                {event.description}
-                            </div>
+                        <div className="flex-1 space-y-4">
+                            <h2 className="text-[10px] font-black text-site-accent uppercase tracking-widest border-l-2 border-site-accent pl-3">Description</h2>
+                            <div className="text-base text-site-text-muted leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: event.description }}></div>
                         </div>
 
-                        <div className="mt-12 sticky bottom-8 sm:static text-black">
+                        <div className="pt-10 flex items-center justify-between gap-8">
+                            <div className="space-y-1">
+                                <span className="text-[9px] font-black text-site-accent uppercase tracking-widest">Prix d'accès</span>
+                                <p className="text-5xl font-black text-white italic tracking-tighter">{event.prix}€</p>
+                            </div>
+
                             {new Date(event.dateHeureDebut) < new Date() ? (
-                                <button disabled className="w-full bg-gray-400 text-white text-lg font-bold py-4 rounded-xl cursor-not-allowed">
-                                    Événement passé
-                                </button>
+                                <div className="px-8 py-4 bg-site-inner border border-site-border rounded-xl text-[10px] font-black uppercase text-site-text-muted tracking-widest italic opacity-50">Session Terminée</div>
                             ) : event.placesRestantes === 0 ? (
-                                <button disabled className="w-full bg-red-400 text-white text-lg font-bold py-4 rounded-xl cursor-not-allowed">
-                                    Complet
-                                </button>
+                                <div className="px-8 py-4 bg-status-error/10 border border-status-error/20 rounded-xl text-[10px] font-black uppercase text-status-error tracking-widest italic shadow-xl shadow-status-error/10">Plus de places</div>
                             ) : (
                                 <button
                                     onClick={handleReserve}
                                     disabled={reserving}
-                                    className="w-full bg-blue-600 text-white text-lg font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-colors transform active:scale-95 disabled:bg-gray-400"
+                                    className="bg-site-accent text-white px-10 py-5 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:brightness-110 shadow-xl shadow-site-accent/30 transition-all active:scale-95 disabled:opacity-50"
                                 >
-                                    {reserving ? 'Réservation en cours...' : 'Réserver ma place'}
+                                    {reserving ? 'Chargement...' : 'Réserver mon ticket'}
                                 </button>
                             )}
+                        </div>
+
+                        <div className="pt-6 border-t border-site-border">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-status-success shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-site-text-muted">Places restantes : <span className="text-white">{event.placesRestantes} / {event.capaciteMax}</span></p>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -8,310 +8,122 @@ import api from '@/lib/api';
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 import 'react-quill-new/dist/quill.snow.css';
 
+const Icons = {
+    Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+};
+
 export default function EditEventPage() {
     const { id } = useParams();
     const router = useRouter();
 
-    const [formData, setFormData] = useState({
-        titre: '',
-        description: '',
-        dateHeureDebut: '',
-        dateHeureFin: '',
-        lieu: '',
-        capaciteMax: 1,
-        imageAffiche: '',
-        categorieId: '',
-    });
-
+    const [formData, setFormData] = useState({ titre: '', description: '', dateHeureDebut: '', dateHeureFin: '', lieu: '', capaciteMax: 1, prix: 0, imageAffiche: '', categorieId: '', });
     const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingInitial, setIsLoadingInitial] = useState(true);
-    const [error, setError] = useState('');
-    const [categories, setCategories] = useState<{ id: string; nom: string }[]>([]);
-    const [showPreview, setShowPreview] = useState(false);
+    const [categories, setCategories] = useState<any[]>([]);
 
-    // Charger les catégories
     useEffect(() => {
-        api.get('/events/categories')
-            .then(res => setCategories(res.data))
-            .catch(err => console.error("Erreur chargement catégories", err));
-    }, []);
-
-    // Charger l'événement à modifier
-    useEffect(() => {
-        if (!id) return;
-
-        api.get(`/events/${id}`)
-            .then(res => {
-                const event = res.data;
-                // Formater les dates pour l'input datetime-local (YYYY-MM-DDTHH:mm)
-                const formatDateForInput = (dateStr: string) => {
-                    if (!dateStr) return '';
-                    // Ajustement fuseau horaire local simple
-                    const date = new Date(dateStr);
-                    const offset = date.getTimezoneOffset() * 60000;
-                    const localISOTime = (new Date(date.getTime() - offset)).toISOString().slice(0, 16);
-                    return localISOTime;
-                };
-
-                setFormData({
-                    titre: event.titre,
-                    description: event.description || '',
-                    dateHeureDebut: formatDateForInput(event.dateHeureDebut),
-                    dateHeureFin: formatDateForInput(event.dateHeureFin),
-                    lieu: event.lieu,
-                    capaciteMax: event.capaciteMax,
-                    imageAffiche: event.imageAffiche || '',
-                    categorieId: event.categorie?.id || event.categorieId || '',
-                });
-            })
-            .catch(err => {
-                console.error(err);
-                setError("Impossible de charger l'événement");
-            })
-            .finally(() => setIsLoadingInitial(false));
+        api.get('/events/categories').then(res => setCategories(res.data));
+        if (id) {
+            api.get(`/events/${id}`).then(res => {
+                const e = res.data;
+                const fmt = (d: string) => d ? new Date(d).toISOString().slice(0, 16) : '';
+                setFormData({ titre: e.titre, description: e.description || '', dateHeureDebut: fmt(e.dateHeureDebut), dateHeureFin: fmt(e.dateHeureFin), lieu: e.lieu, capaciteMax: e.capaciteMax, prix: e.prix || 0, imageAffiche: e.imageAffiche || '', categorieId: e.categorie?.id || e.categorieId || '', });
+            });
+        }
     }, [id]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        const debut = new Date(formData.dateHeureDebut);
-        const fin = new Date(formData.dateHeureFin);
-
-        if (fin <= debut) {
-            setError('La date de fin doit être après la date de début');
-            return;
-        }
-
         setIsLoading(true);
-        setError('');
-
         try {
-            // PUT pour mettre à jour
-            await api.put(`/events/${id}`, {
-                ...formData,
-                capaciteMax: Number(formData.capaciteMax),
-            });
-
+            await api.put(`/events/${id}`, { ...formData, capaciteMax: Number(formData.capaciteMax), prix: Number(formData.prix), });
             router.push('/admin/events');
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Erreur lors de la modification');
-        } finally {
-            setIsLoading(false);
-        }
+        } catch (err) { alert('Erreur'); } finally { setIsLoading(false); }
     };
-
-    const formatDate = (dateStr: string) => {
-        if (!dateStr) return '—';
-        return new Date(dateStr).toLocaleString('fr-FR');
-    };
-
-    if (isLoadingInitial) return <div className="p-8">Chargement de l'événement...</div>;
-
-    if (showPreview) {
-        return (
-            <div className="p-8 max-w-2xl mx-auto">
-                <h1 className="text-2xl font-bold mb-6">Preview de l'événement (Modification)</h1>
-
-                <div className="border rounded p-6 space-y-4 bg-white shadow">
-                    <h2 className="text-xl font-bold">{formData.titre || 'Sans titre'}</h2>
-
-                    <div
-                        className="text-gray-700"
-                        dangerouslySetInnerHTML={{ __html: formData.description || '<em>Pas de description</em>' }}
-                    />
-
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <span className="font-medium">Début : </span>
-                            {formatDate(formData.dateHeureDebut)}
-                        </div>
-                        <div>
-                            <span className="font-medium">Fin : </span>
-                            {formatDate(formData.dateHeureFin)}
-                        </div>
-                        <div>
-                            <span className="font-medium">Lieu : </span>
-                            {formData.lieu || '—'}
-                        </div>
-                        <div>
-                            <span className="font-medium">Catégorie : </span>
-                            {categories.find(c => c.id === formData.categorieId)?.nom || '—'}
-                        </div>
-                        <div>
-                            <span className="font-medium">Capacité : </span>
-                            {formData.capaciteMax} personnes
-                        </div>
-                    </div>
-
-                    {formData.imageAffiche && (
-                        <img
-                            src={formData.imageAffiche}
-                            alt="Affiche"
-                            className="w-full max-h-64 object-cover rounded"
-                        />
-                    )}
-                </div>
-
-                <div className="flex gap-4 mt-6">
-                    <button
-                        onClick={() => setShowPreview(false)}
-                        className="flex-1 border border-blue-600 text-blue-600 py-2 rounded hover:bg-blue-50"
-                    >
-                        ← Retour au formulaire
-                    </button>
-                    <button
-                        onClick={handleSubmit as any}
-                        disabled={isLoading}
-                        className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
-                    >
-                        {isLoading ? 'Enregistrement...' : 'Enregistrer les modifications'}
-                    </button>
-                </div>
-            </div>
-        );
-    }
 
     return (
-        <div className="p-8 max-w-2xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6">Modifier l'événement</h1>
-            {error && (
-                <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
-                    {error}
-                </div>
-            )}
+        <div className="space-y-16 pb-40">
+            <header className="space-y-1">
+                <h1 className="text-6xl font-black text-admin-text-main tracking-tighter uppercase italic">Optimisation</h1>
+                <p className="text-admin-text-dim font-bold text-xs uppercase tracking-[0.3em] px-1">Révision structurelle de l'unité #{id?.toString().slice(0, 8)}</p>
+            </header>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label className="block font-medium mb-1">Titre *</label>
-                    <input
-                        type="text"
-                        name="titre"
-                        value={formData.titre}
-                        onChange={handleChange}
-                        required
-                        maxLength={200}
-                        className="w-full border rounded p-2"
-                        placeholder="Nom de l'événement"
-                    />
-                </div>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+                <div className="lg:col-span-2 space-y-12">
+                    <section className="bg-admin-card p-12 rounded-[4rem] border border-admin-border space-y-10 shadow-2xl">
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.5em] px-4 italic">Identifiant Titre</label>
+                            <input
+                                type="text"
+                                name="titre"
+                                value={formData.titre}
+                                onChange={(e) => setFormData(p => ({ ...p, titre: e.target.value }))}
+                                required
+                                className="w-full bg-admin-inner border border-admin-border rounded-2xl py-7 px-8 text-2xl font-black text-admin-accent outline-none focus:border-admin-accent/50 transition-all shadow-inner uppercase tracking-tighter italic font-sans"
+                            />
+                        </div>
 
-                <div>
-                    <label className="block font-medium mb-1">Description</label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        className="w-full border rounded p-2 h-32"
-                        placeholder="Description détaillée de l'événement..."
-                    />
-                </div>
-
-                <div>
-                    <label className="block font-medium mb-1">Date et heure de début *</label>
-                    <input
-                        type="datetime-local"
-                        name="dateHeureDebut"
-                        value={formData.dateHeureDebut}
-                        onChange={handleChange}
-                        required
-                        className="w-full border rounded p-2"
-                    />
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.5em] px-4 italic">Narration Logistique</label>
+                            <div className="rounded-2xl overflow-hidden border border-admin-border bg-admin-inner shadow-inner min-h-[400px]">
+                                <ReactQuill
+                                    theme="snow"
+                                    value={formData.description}
+                                    onChange={(v) => setFormData(p => ({ ...p, description: v }))}
+                                    className="bg-transparent"
+                                />
+                            </div>
+                        </div>
+                    </section>
                 </div>
 
-                <div>
-                    <label className="block font-medium mb-1">Date et heure de fin *</label>
-                    <input
-                        type="datetime-local"
-                        name="dateHeureFin"
-                        value={formData.dateHeureFin}
-                        onChange={handleChange}
-                        required
-                        min={formData.dateHeureDebut}
-                        className="w-full border rounded p-2"
-                    />
-                </div>
+                <div className="space-y-12">
+                    <section className="bg-admin-accent p-12 rounded-[4rem] text-admin-bg shadow-2xl shadow-admin-accent/30 space-y-10">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] opacity-60">Synchronisation</h3>
+                        <div className="space-y-8">
+                            <div className="space-y-3">
+                                <label className="text-[9px] font-black uppercase tracking-widest opacity-40 px-2 underline decoration-2 underline-offset-4">Initialisation</label>
+                                <input
+                                    type="datetime-local"
+                                    name="dateHeureDebut"
+                                    value={formData.dateHeureDebut}
+                                    onChange={(e) => setFormData(p => ({ ...p, dateHeureDebut: e.target.value }))}
+                                    className="w-full bg-admin-bg/10 border border-white/10 rounded-xl py-5 px-6 text-sm font-black outline-none font-sans"
+                                />
+                            </div>
+                        </div>
+                    </section>
 
-                <div>
-                    <label className="block font-medium mb-1">Lieu *</label>
-                    <input
-                        type="text"
-                        name="lieu"
-                        value={formData.lieu}
-                        onChange={handleChange}
-                        required
-                        className="w-full border rounded p-2"
-                        placeholder="Adresse ou lieu"
-                    />
-                </div>
-
-                <div>
-                    <label className="block font-medium mb-1">Capacité max *</label>
-                    <input
-                        type="number"
-                        name="capaciteMax"
-                        value={formData.capaciteMax}
-                        onChange={handleChange}
-                        required
-                        min={1}
-                        className="w-full border rounded p-2"
-                    />
-                </div>
-
-                <div>
-                    <label className="block font-medium mb-1">URL de l'image</label>
-                    <input
-                        type="url"
-                        name="imageAffiche"
-                        value={formData.imageAffiche}
-                        onChange={handleChange}
-                        className="w-full border rounded p-2"
-                        placeholder="https://example.com/image.jpg"
-                    />
-                </div>
-
-                <div>
-                    <label className="block font-medium mb-1">Catégorie *</label>
-                    <select
-                        name="categorieId"
-                        value={formData.categorieId}
-                        onChange={handleChange}
-                        required
-                        className="w-full border rounded p-2"
-                    >
-                        <option value="">Sélectionner une catégorie</option>
-                        {categories.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                                {cat.nom}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="flex gap-4">
-                    <button
-                        type="button"
-                        onClick={() => setShowPreview(true)}
-                        className="flex-1 border border-blue-600 text-blue-600 py-2 rounded hover:bg-blue-50"
-                    >
-                        Preview
-                    </button>
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+                        className="w-full py-10 bg-admin-text-main text-admin-bg rounded-[3rem] font-black text-xs uppercase tracking-[0.4em] hover:bg-admin-accent transition-all shadow-2xl shadow-black/50 active:scale-95 disabled:opacity-30"
                     >
-                        {isLoading ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                        {isLoading ? 'TRAITEMENT...' : 'SAUVEGARDER L\'UNITÉ'}
                     </button>
+
+                    <div className="bg-admin-card p-12 rounded-[4rem] border border-admin-border space-y-10 shadow-xl">
+                        <div className="space-y-4">
+                            <label className="text-[9px] font-black text-admin-text-dim uppercase tracking-[0.5em] px-2 italic">Tarification Unit (€)</label>
+                            <input
+                                type="number"
+                                name="prix"
+                                value={formData.prix}
+                                onChange={(e) => setFormData(p => ({ ...p, prix: Number(e.target.value) }))}
+                                required
+                                className="w-full bg-admin-inner border border-admin-border rounded-2xl py-6 px-8 text-5xl font-black text-admin-accent outline-none font-sans tracking-tighter"
+                            />
+                        </div>
+                    </div>
                 </div>
             </form>
+            <style jsx global>{`
+                .ql-container { border: none !important; color: var(--color-admin-text-main) !important; font-family: inherit !important; font-size: 16px !important; }
+                .ql-toolbar { border: none !important; border-bottom: 1px solid var(--color-admin-border) !important; padding: 25px !important; background: var(--color-admin-card) !important; border-radius: 20px 20px 0 0 !important; }
+                .ql-editor { padding: 40px !important; min-height: 400px !important; font-weight: 500 !important; line-height: 1.8 !important; }
+                .ql-snow .ql-stroke { stroke: var(--color-admin-text-dim) !important; stroke-width: 2px !important; }
+                .ql-snow .ql-fill { fill: var(--color-admin-text-dim) !important; }
+                .ql-snow .ql-picker { color: var(--color-admin-text-dim) !important; font-weight: 700 !important; }
+            `}</style>
         </div>
     );
 }

@@ -67,7 +67,7 @@ export class ReservationsService {
 
         const [items, total] = await this.reservationRepository.findAndCount({
             where,
-            relations: ['evenement'],
+            relations: ['evenement', 'utilisateur'],
             order: { dateReservation: 'DESC' },
             skip: (page - 1) * limit,
             take: limit,
