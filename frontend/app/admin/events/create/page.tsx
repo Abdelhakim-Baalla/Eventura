@@ -165,9 +165,12 @@ export default function CreateEventPage() {
 
                 <div>
                     <label className="block font-medium mb-1">Description</label>
-                    <ReactQuill
+                    <textarea
+                        name="description"
                         value={formData.description}
-                        onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
+                        onChange={handleChange}
+                        className="w-full border rounded p-2 h-32"
+                        placeholder="Description détaillée de l'événement..."
                     />
                 </div>
 
