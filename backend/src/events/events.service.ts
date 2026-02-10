@@ -29,12 +29,20 @@ export class EventsService {
       relations: ['reservations']
     });
 
+    const now = new Date();
     const totalEvents = events.length;
+    let upcomingEvents = 0;
     let totalReservations = 0;
-    let totalRevenue = 0;
     let totalConfirmed = 0;
+    let totalRevenue = 0;
+    let totalCapacity = 0;
 
     events.forEach(event => {
+      totalCapacity += event.capaciteMax;
+      if (new Date(event.dateHeureDebut) > now) {
+        upcomingEvents++;
+      }
+
       totalReservations += event.reservations.length;
       event.reservations.forEach(res => {
         if (res.statut === StatutReservation.CONFIRME) {
@@ -44,11 +52,17 @@ export class EventsService {
       });
     });
 
+    const occupancyRate = totalCapacity > 0
+      ? Math.round((totalConfirmed / totalCapacity) * 100)
+      : 0;
+
     return {
       totalEvents,
+      upcomingEvents,
       totalReservations,
       totalConfirmed,
-      totalRevenue
+      totalRevenue,
+      occupancyRate
     };
   }
 
