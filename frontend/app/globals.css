@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* THEME: "Amber High-End" - Pure Luxury & Contrast */
+  /* THEME: "Amber High-End" - Admin Console */
   --color-admin-bg: #050505;
-  /* True Abyss */
   --color-admin-card: #0F0F12;
-  /* Darker card */
   --color-admin-inner: #16161A;
-  /* Deepest elements */
   --color-admin-border: #1E1E22;
-  /* Sharp dividers */
-
   --color-admin-accent: #F59E0B;
-  /* Golden Amber (Premium) */
   --color-admin-accent-soft: rgba(245, 158, 11, 0.1);
-
   --color-admin-text-main: #FFFFFF;
-  /* Pure White */
   --color-admin-text-muted: #A1A1AA;
-  /* Silver Slate */
   --color-admin-text-dim: #52525B;
-  /* Faded Slate */
+
+  /* THEME: "Cobalt High-End" - Public Site */
+  --color-site-bg: #050505;
+  --color-site-card: #0A0A0C;
+  --color-site-inner: #0F0F12;
+  --color-site-border: #141418;
+  --color-site-accent: #3B82F6;
+  --color-site-accent-glow: rgba(59, 130, 246, 0.5);
+  --color-site-text-main: #FFFFFF;
+  --color-site-text-muted: #94A3B8;
 
   /* Status */
   --color-status-success: #10B981;
@@ -30,52 +30,76 @@
   --font-sans: 'Inter', system-ui, sans-serif;
 }
 
-:root {
-  background-color: var(--color-admin-bg);
-  color: var(--color-admin-text-main);
-}
-
+/* GLOBAL RESET & FORCE DARK */
+html,
 body {
-  background-color: var(--color-admin-bg);
-  color: var(--color-admin-text-main);
+  background-color: #050505 !important;
+  color: #FFFFFF !important;
+  margin: 0;
+  padding: 0;
+  height: 100%;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Force consistency across all elements */
-* {
+/* Eliminate any accidental white blocks from children */
+div,
+section,
+nav,
+header,
+main,
+footer,
+aside {
   border-color: var(--color-admin-border);
 }
 
+/* Standardized Form UX */
 input,
 select,
 textarea {
-  background-color: var(--color-admin-inner) !important;
-  color: var(--color-admin-text-main) !important;
-  border: 1px solid var(--color-admin-border) !important;
+  background-color: #121214 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #1E1E22 !important;
+  outline: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-site-accent) !important;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Select specific fix */
+select option {
+  background-color: #0F0F12 !important;
+  color: #FFFFFF !important;
 }
 
 /* Scrollbar Lux */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-admin-bg);
+  background: #050505;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-admin-border);
+  background: #1E1E22;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-admin-accent);
+  background: #3B82F6;
 }
 
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
 
   to {
@@ -85,5 +109,10 @@ textarea {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Custom Scrollbar Utility */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 4px;
 }

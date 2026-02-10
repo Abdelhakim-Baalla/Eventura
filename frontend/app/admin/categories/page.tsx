@@ -45,63 +45,66 @@ export default function AdminCategoriesPage() {
     };
 
     return (
-        <div className="space-y-16">
+        <div className="space-y-12">
             <header className="space-y-1">
-                <h1 className="text-6xl font-black text-admin-text-main tracking-tighter uppercase italic">Thématiques</h1>
-                <p className="text-admin-text-dim font-bold text-xs uppercase tracking-[0.3em] px-1">Structure Sémantique du Réseau</p>
+                <h1 className="text-5xl font-black text-admin-text-main tracking-tighter uppercase italic">Thématiques</h1>
+                <p className="text-admin-text-dim font-bold text-[10px] uppercase tracking-[0.4em] px-1 italic">Architecture Sémantique du Réseau</p>
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-16">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16">
                 <div className="lg:col-span-2">
-                    <form onSubmit={handleAdd} className="bg-admin-card p-12 rounded-[3rem] border border-admin-border shadow-2xl space-y-10 relative overflow-hidden group">
+                    <form onSubmit={handleAdd} className="bg-admin-card p-10 rounded-[3rem] border border-admin-border shadow-2xl space-y-8 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-admin-accent opacity-[0.03] blur-[40px] -mr-16 -mt-16"></div>
 
                         <div className="space-y-4">
-                            <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.5em] px-2 italic">
+                            <label className="text-[9px] font-black text-admin-text-dim uppercase tracking-[0.5em] px-2 italic">
                                 {editingCat ? 'Mise à Jour Prototype' : 'Nouveau Prototype'}
                             </label>
                             <input
                                 type="text"
                                 value={newCat}
                                 onChange={(e) => setNewCat(e.target.value)}
-                                placeholder="Injection Label..."
-                                className="w-full bg-admin-inner border border-admin-border rounded-2xl py-7 px-8 text-sm font-black text-admin-accent uppercase tracking-widest outline-none focus:border-admin-accent/50 transition-all font-sans shadow-inner placeholder:opacity-20"
+                                placeholder="Nom de la thématique..."
+                                className="w-full bg-admin-inner border border-admin-border rounded-2xl py-6 px-7 text-sm font-black text-white uppercase tracking-widest outline-none focus:border-admin-accent transition-all font-sans shadow-inner placeholder:italic placeholder:opacity-20"
                             />
                         </div>
-                        <div className="flex gap-4">
-                            <button className="flex-1 bg-admin-accent text-admin-bg py-6 rounded-2xl font-black text-xs uppercase tracking-widest hover:brightness-110 flex items-center justify-center gap-4 transition-all shadow-xl shadow-admin-accent/20 active:scale-95">
-                                {editingCat ? 'Sauvegarder' : <><Icons.Plus /> Enregistrer</>}
+                        <div className="flex gap-4 pt-4">
+                            <button className="flex-1 bg-admin-accent text-admin-bg py-5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:brightness-110 flex items-center justify-center gap-3 transition-all shadow-xl shadow-admin-accent/20 active:scale-95">
+                                {editingCat ? 'Sauvegarder' : <><Icons.Plus /> Ajouter</>}
                             </button>
                             {editingCat && (
-                                <button type="button" onClick={() => { setEditingCat(null); setNewCat(''); }} className="px-8 bg-admin-inner border border-admin-border text-admin-text-dim rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-admin-text-main">Annuler</button>
+                                <button type="button" onClick={() => { setEditingCat(null); setNewCat(''); }} className="px-6 bg-admin-inner border border-admin-border text-admin-text-dim rounded-xl text-[9px] font-black uppercase tracking-widest hover:text-admin-text-main transition-colors">Annuler</button>
                             )}
                         </div>
                     </form>
                 </div>
 
-                <div className="lg:col-span-3 bg-admin-card rounded-[3.5rem] border border-admin-border overflow-hidden shadow-2xl">
-                    <div className="bg-admin-inner/50 px-10 py-6 border-b border-admin-border flex items-center justify-between">
-                        <span className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.4em]">Architecture Active</span>
+                <div className="lg:col-span-3 bg-admin-card rounded-[3rem] border border-admin-border overflow-hidden shadow-2xl flex flex-col">
+                    <div className="bg-admin-inner/50 px-8 py-5 border-b border-admin-border flex items-center justify-between">
+                        <span className="text-[9px] font-black text-admin-text-dim uppercase tracking-[0.4em]">Structure Active</span>
                         <div className="w-2 h-2 bg-admin-accent rounded-full animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
                     </div>
                     <div className="divide-y divide-admin-border/50">
                         {categories.map((c) => (
-                            <div key={c.id} className="px-10 py-8 flex items-center justify-between group hover:bg-admin-inner/30 transition-all">
+                            <div key={c.id} className="px-8 py-6 flex items-center justify-between group hover:bg-admin-inner/30 transition-all">
                                 <div className="flex items-center gap-6">
-                                    <div className="w-3 h-3 bg-admin-border rounded-full border border-admin-border group-hover:bg-admin-accent group-hover:border-admin-accent/50 group-hover:scale-125 transition-all shadow-[0_0_15px_rgba(245,158,11,0)] group-hover:shadow-[0_0_15px_rgba(245,158,11,0.3)]"></div>
-                                    <span className="text-2xl font-black text-admin-text-main tracking-tighter uppercase italic group-hover:text-admin-accent transition-colors">{c.nom}</span>
+                                    <div className="w-2 h-2 bg-admin-border rounded-full border border-admin-border group-hover:bg-admin-accent group-hover:border-admin-accent/50 group-hover:scale-125 transition-all"></div>
+                                    <span className="text-xl font-black text-admin-text-main tracking-tighter uppercase italic group-hover:text-admin-accent transition-colors">{c.nom}</span>
                                 </div>
 
-                                <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-all">
-                                    <button onClick={() => startEdit(c)} className="w-10 h-10 flex items-center justify-center bg-admin-inner border border-admin-border rounded-xl text-admin-text-dim hover:text-admin-accent hover:border-admin-accent/30 transition-all">
+                                <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-all">
+                                    <button onClick={() => startEdit(c)} className="w-9 h-9 flex items-center justify-center bg-admin-inner border border-admin-border rounded-lg text-admin-text-dim hover:text-admin-accent hover:border-admin-accent/30 transition-all">
                                         <Icons.Edit />
                                     </button>
-                                    <button onClick={() => handleDelete(c.id)} className="w-10 h-10 flex items-center justify-center bg-admin-inner border border-admin-border rounded-xl text-admin-text-dim hover:text-status-error hover:border-status-error/30 transition-all">
+                                    <button onClick={() => handleDelete(c.id)} className="w-9 h-9 flex items-center justify-center bg-admin-inner border border-admin-border rounded-lg text-admin-text-dim hover:text-status-error hover:border-status-error/30 transition-all">
                                         <Icons.Delete />
                                     </button>
                                 </div>
                             </div>
                         ))}
+                        {categories.length === 0 && (
+                            <div className="p-20 text-center italic text-[10px] uppercase font-black text-admin-text-dim opacity-30 tracking-widest">Aucune donnée détectée</div>
+                        )}
                     </div>
                 </div>
             </div>

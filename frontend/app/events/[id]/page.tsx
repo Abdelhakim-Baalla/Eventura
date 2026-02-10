@@ -19,109 +19,104 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     }, [id]);
 
     const handleReserve = async () => {
-        if (!confirm('Rejoindre cette session ?')) return;
+        if (!confirm('Rejoindre cet événement ?')) return;
         setReserving(true);
-        try { await api.post('/reservations', { evenementId: id }); router.push('/reservations'); }
-        catch (err: any) { if (err.response?.status === 401) router.push('/login'); else alert(err.response?.data?.message || 'Erreur'); }
+        try {
+            await api.post('/reservations', { evenementId: id });
+            router.push('/reservations');
+        }
+        catch (err: any) {
+            if (err.response?.status === 401) router.push('/login');
+            else alert(err.response?.data?.message || 'Erreur lors de la réservation');
+        }
         finally { setReserving(false); }
     };
 
     if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-admin-bg">
-            <div className="w-16 h-16 border-2 border-admin-border border-t-admin-accent rounded-full animate-spin"></div>
+        <div className="min-h-screen flex items-center justify-center bg-site-bg">
+            <div className="w-10 h-10 border-2 border-site-border border-t-site-accent rounded-full animate-spin"></div>
         </div>
     );
 
     if (!event) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-admin-bg text-admin-text-main p-20 text-center space-y-8">
-            <h1 className="text-7xl font-black italic uppercase tracking-tighter">Unité Inconnue.</h1>
-            <Link href="/" className="text-admin-accent font-black uppercase tracking-[0.5em] text-[11px] hover:underline decoration-4 underline-offset-8">Retour au Catalogue Central</Link>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-site-bg text-site-text-main p-12 text-center space-y-4">
+            <h1 className="text-4xl font-black uppercase italic">Événement introuvable.</h1>
+            <Link href="/" className="text-site-accent font-black uppercase tracking-widest text-xs hover:underline">Retour au catalogue</Link>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-admin-bg text-admin-text-main font-sans selection:bg-admin-accent selection:text-admin-bg pb-48 overflow-x-hidden">
-            <nav className="h-24 bg-admin-card/80 backdrop-blur-xl border-b border-admin-border flex items-center sticky top-0 z-50 px-10">
+        <div className="min-h-screen bg-site-bg text-site-text-main font-sans selection:bg-site-accent selection:text-white pb-32">
+            <nav className="h-16 bg-site-bg/90 backdrop-blur-md border-b border-site-border flex items-center sticky top-0 z-50 px-6 lg:px-12">
                 <div className="max-w-6xl mx-auto w-full flex items-center justify-between">
-                    <Link href="/" className="text-[11px] font-black uppercase tracking-[0.4em] text-admin-accent hover:text-admin-text-main transition-all flex items-center gap-6 group">
-                        <div className="w-10 h-10 border-2 border-admin-accent rounded-xl flex items-center justify-center group-hover:bg-admin-accent group-hover:text-admin-bg transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
-                        </div>
-                        RETOUR
+                    <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-site-text-muted hover:text-white transition-all flex items-center gap-2 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6" /></svg>
+                        Retour
                     </Link>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-admin-text-dim truncate max-w-[300px] italic opacity-50">{event.titre}</span>
-                    <div className="w-40"></div>
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-site-text-muted italic opacity-50 truncate max-w-xs">{event.titre}</span>
+                    <div className="w-20"></div>
                 </div>
             </nav>
 
-            <main className="max-w-6xl mx-auto px-10 pt-20">
-                <div className="bg-admin-card rounded-[5rem] border-2 border-admin-border overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.5)] relative">
-                    <div className="h-[650px] bg-admin-inner relative group">
+            <main className="max-w-6xl mx-auto px-6 pt-12">
+                <div className="bg-site-card rounded-3xl border border-site-border overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[500px]">
+                    <div className="md:w-1/2 relative bg-site-inner overflow-hidden border-r border-site-border">
                         {event.imageAffiche ? (
-                            <img src={event.imageAffiche} alt={event.titre} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" />
+                            <img src={event.imageAffiche} alt={event.titre} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-admin-text-dim font-black uppercase tracking-[0.8em] italic opacity-10 text-4xl">Image Null</div>
+                            <div className="w-full h-full flex items-center justify-center text-site-text-dim text-[10px] font-black uppercase tracking-widest opacity-20">No Visual</div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-admin-card via-admin-card/20 to-transparent"></div>
-                        <div className="absolute bottom-20 left-20 right-20 space-y-10">
-                            <span className="bg-admin-accent text-admin-bg px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-[0.5em] inline-block shadow-2xl shadow-admin-accent/30 scale-110">
-                                {event.categorie?.nom}
-                            </span>
-                            <h1 className="text-7xl md:text-[9rem] font-black tracking-tighter uppercase italic leading-[0.8] drop-shadow-2xl">{event.titre}</h1>
+                        <div className="absolute top-6 left-6 bg-site-accent text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/20 shadow-xl shadow-site-accent/20">
+                            {event.categorie?.nom}
                         </div>
                     </div>
 
-                    <div className="p-20 flex flex-col lg:flex-row gap-24 relative">
-                        <div className="absolute top-0 right-0 w-96 h-96 bg-admin-accent opacity-[0.03] blur-[150px] -mr-48 -mt-48"></div>
-
-                        <div className="flex-1 space-y-16">
-                            <div className="space-y-8">
-                                <h2 className="text-[11px] font-black text-admin-accent uppercase tracking-[0.6em] border-l-4 border-admin-accent pl-6">Narration Logue</h2>
-                                <div className="text-2xl text-admin-text-main leading-relaxed font-bold italic opacity-90 prose-invert" dangerouslySetInnerHTML={{ __html: event.description }}></div>
+                    <div className="md:w-1/2 p-10 md:p-16 space-y-12 flex flex-col">
+                        <div className="space-y-6">
+                            <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic leading-[0.9]">{event.titre}</h1>
+                            <div className="grid grid-cols-2 gap-8 py-6 border-y border-site-border">
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black text-site-text-muted uppercase tracking-widest opacity-60 italic">Date & Heure</p>
+                                    <p className="text-sm font-black text-site-text-main italic">{new Date(event.dateHeureDebut).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                                    <p className="text-xs font-bold text-site-accent">{new Date(event.dateHeureDebut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black text-site-text-muted uppercase tracking-widest opacity-60 italic">Lieu</p>
+                                    <p className="text-sm font-black text-site-text-main italic uppercase tracking-tight">{event.lieu}</p>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="w-full lg:w-96 shrink-0 relative z-10">
-                            <div className="bg-admin-bg/50 backdrop-blur-3xl p-12 rounded-[4rem] border-2 border-admin-border space-y-16 h-fit sticky top-40 shadow-2xl">
-                                <div className="space-y-10">
-                                    <div className="space-y-2 border-b border-admin-border pb-6">
-                                        <p className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.4em]">Temporalité</p>
-                                        <p className="text-2xl font-black text-admin-text-main italic">{new Date(event.dateHeureDebut).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                                        <p className="text-sm font-black text-admin-accent uppercase tracking-widest">{new Date(event.dateHeureDebut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
-                                    </div>
-                                    <div className="space-y-2 border-b border-admin-border pb-6">
-                                        <p className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.4em]">Géolocalisation</p>
-                                        <p className="text-2xl font-black text-admin-text-main italic uppercase tracking-tighter leading-none">{event.lieu}</p>
-                                    </div>
-                                    <div className="space-y-2 border-b border-admin-border pb-6">
-                                        <p className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.4em]">Disponibilité Flux</p>
-                                        <div className="flex items-center gap-4">
-                                            <p className={`text-3xl font-black italic tracking-tighter ${event.placesRestantes < 5 ? 'text-status-error' : 'text-status-success'}`}>{event.placesRestantes} / {event.capaciteMax}</p>
-                                            <span className="text-[10px] font-black uppercase text-admin-text-dim tracking-widest italic leading-none pt-2">Units Open</span>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div className="flex-1 space-y-4">
+                            <h2 className="text-[10px] font-black text-site-accent uppercase tracking-widest border-l-2 border-site-accent pl-3">Description</h2>
+                            <div className="text-base text-site-text-muted leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: event.description }}></div>
+                        </div>
 
-                                <div className="pt-10 flex flex-col gap-10">
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.5em]">Tarification Session</span>
-                                        <span className="text-7xl font-black text-admin-accent tracking-tighter italic leading-none">{event.prix}€</span>
-                                    </div>
+                        <div className="pt-10 flex items-center justify-between gap-8">
+                            <div className="space-y-1">
+                                <span className="text-[9px] font-black text-site-accent uppercase tracking-widest">Prix d'accès</span>
+                                <p className="text-5xl font-black text-white italic tracking-tighter">{event.prix}€</p>
+                            </div>
 
-                                    {new Date(event.dateHeureDebut) < new Date() ? (
-                                        <div className="w-full py-8 bg-admin-inner border-2 border-admin-border rounded-[2.5rem] text-[11px] font-black uppercase text-center text-admin-text-dim tracking-[0.4em] italic cursor-not-allowed opacity-30">UNITÉ CLOSE</div>
-                                    ) : event.placesRestantes === 0 ? (
-                                        <div className="w-full py-8 bg-status-error/10 border-2 border-status-error/20 rounded-[2.5rem] text-[11px] font-black uppercase text-center text-status-error tracking-[0.4em] italic cursor-not-allowed shadow-2xl">CAPACITÉ SATURÉE</div>
-                                    ) : (
-                                        <button
-                                            onClick={handleReserve}
-                                            disabled={reserving}
-                                            className="w-full py-8 bg-admin-accent text-admin-bg rounded-[2.5rem] text-xs font-black uppercase tracking-[0.4em] hover:brightness-110 shadow-[0_20px_40px_rgba(245,158,11,0.3)] transition-all active:scale-95 disabled:opacity-50"
-                                        >
-                                            {reserving ? 'SYNCHRONISATION...' : 'RÉSERVER L\'ACCÈS'}
-                                        </button>
-                                    )}
-                                </div>
+                            {new Date(event.dateHeureDebut) < new Date() ? (
+                                <div className="px-8 py-4 bg-site-inner border border-site-border rounded-xl text-[10px] font-black uppercase text-site-text-muted tracking-widest italic opacity-50">Session Terminée</div>
+                            ) : event.placesRestantes === 0 ? (
+                                <div className="px-8 py-4 bg-status-error/10 border border-status-error/20 rounded-xl text-[10px] font-black uppercase text-status-error tracking-widest italic shadow-xl shadow-status-error/10">Plus de places</div>
+                            ) : (
+                                <button
+                                    onClick={handleReserve}
+                                    disabled={reserving}
+                                    className="bg-site-accent text-white px-10 py-5 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:brightness-110 shadow-xl shadow-site-accent/30 transition-all active:scale-95 disabled:opacity-50"
+                                >
+                                    {reserving ? 'Chargement...' : 'Réserver mon ticket'}
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="pt-6 border-t border-site-border">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-status-success shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-site-text-muted">Places restantes : <span className="text-white">{event.placesRestantes} / {event.capaciteMax}</span></p>
                             </div>
                         </div>
                     </div>

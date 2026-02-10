@@ -31,7 +31,7 @@ export default function RegisterPage() {
             });
             if (!response.ok) {
                 const error = await response.json();
-                setErrors({ submit: error.message || 'Échec' });
+                setErrors({ submit: error.message || 'Échec de l\'inscription' });
                 return;
             }
             router.push('/login');
@@ -43,76 +43,80 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-admin-bg p-8">
-            <div className="max-w-2xl w-full bg-admin-card p-16 rounded-[4rem] border border-admin-border shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-admin-accent opacity-[0.03] blur-[60px] -mr-32 -mt-32"></div>
+        <div className="min-h-screen flex items-center justify-center bg-site-bg p-6 selection:bg-site-accent selection:text-white">
+            <div className="max-w-xl w-full bg-site-card p-10 md:p-12 rounded-[2.5rem] border border-site-border shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-site-accent opacity-5 blur-[40px] -mr-16 -mt-16"></div>
 
-                <div className="text-center mb-16">
-                    <h1 className="text-6xl font-black text-admin-text-main tracking-tighter uppercase italic leading-none">Déploiement</h1>
-                    <p className="text-admin-text-dim text-[10px] uppercase font-black tracking-[0.4em] mt-4 italic opacity-50">Création d'une nouvelle signature</p>
+                <div className="text-center mb-10">
+                    <div className="inline-block w-12 h-12 bg-site-accent rounded-xl flex items-center justify-center text-white font-black text-xl mb-6 shadow-lg shadow-site-accent/20">E</div>
+                    <h1 className="text-3xl font-black text-white tracking-tight uppercase italic leading-none">Inscription</h1>
+                    <p className="text-site-text-muted text-[10px] uppercase font-black tracking-widest mt-2 opacity-40">Rejoindre l'univers Eventura</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-8">
-                    <div className="grid grid-cols-2 gap-8">
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.4em] px-4 italic">Nom</label>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-site-text-muted uppercase tracking-widest px-2 opacity-60">Nom</label>
                             <input
                                 type="text"
                                 value={formData.nom}
                                 onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
-                                className="w-full bg-admin-inner border border-admin-border rounded-2xl py-6 px-8 text-sm font-black text-admin-text-main focus:border-admin-accent/50 transition-all outline-none shadow-inner"
+                                className="w-full bg-site-inner border border-site-border rounded-xl py-4 px-6 text-sm font-bold text-white focus:border-site-accent transition-all outline-none shadow-inner"
+                                required
                             />
                         </div>
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.4em] px-4 italic">Prénom</label>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-site-text-muted uppercase tracking-widest px-2 opacity-60">Prénom</label>
                             <input
                                 type="text"
                                 value={formData.prenom}
                                 onChange={(e) => setFormData({ ...formData, prenom: e.target.value })}
-                                className="w-full bg-admin-inner border border-admin-border rounded-2xl py-6 px-8 text-sm font-black text-admin-text-main focus:border-admin-accent/50 transition-all outline-none shadow-inner"
+                                className="w-full bg-site-inner border border-site-border rounded-xl py-4 px-6 text-sm font-bold text-white focus:border-site-accent transition-all outline-none shadow-inner"
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.4em] px-4 italic">Identifiant Email</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-site-text-muted uppercase tracking-widest px-2 opacity-60">Identifiant Email</label>
                         <input
                             type="email"
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="w-full bg-admin-inner border border-admin-border rounded-2xl py-6 px-8 text-sm font-black text-admin-text-main focus:border-admin-accent/50 transition-all outline-none shadow-inner"
+                            className="w-full bg-site-inner border border-site-border rounded-xl py-4 px-6 text-sm font-bold text-white focus:border-site-accent transition-all outline-none shadow-inner"
+                            required
                         />
                     </div>
 
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.4em] px-4 italic">Code d'accès</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-site-text-muted uppercase tracking-widest px-2 opacity-60">Code d'accès sécurisé</label>
                         <input
                             type="password"
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            className="w-full bg-admin-inner border border-admin-border rounded-2xl py-6 px-8 text-sm font-black text-admin-text-main focus:border-admin-accent/50 transition-all outline-none shadow-inner"
+                            className="w-full bg-site-inner border border-site-border rounded-xl py-4 px-6 text-sm font-bold text-white focus:border-site-accent transition-all outline-none shadow-inner"
+                            required
                         />
                     </div>
 
                     {errors.submit && (
-                        <div className="p-5 bg-status-error/5 border border-status-error/10 rounded-2xl text-center">
-                            <p className="text-status-error text-[10px] font-black uppercase tracking-widest italic">{errors.submit}</p>
+                        <div className="p-4 bg-status-error/10 border border-status-error/20 rounded-xl text-center">
+                            <p className="text-status-error text-[10px] font-black uppercase tracking-widest leading-none">{errors.submit}</p>
                         </div>
                     )}
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-admin-accent text-admin-bg py-6 rounded-2xl font-black text-xs uppercase tracking-[0.4em] hover:brightness-110 shadow-2xl shadow-admin-accent/20 transition-all disabled:opacity-50 mt-4 active:scale-95"
+                        className="w-full bg-site-accent text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:brightness-110 shadow-xl shadow-site-accent/20 transition-all disabled:opacity-50 mt-4 active:scale-95"
                     >
                         {loading ? 'INITIALISATION...' : 'CRÉER LE COMPTE'}
                     </button>
                 </form>
 
-                <div className="mt-16 pt-10 border-t border-admin-border text-center">
-                    <p className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.3em]">
-                        Déjà identifié ?{' '}
-                        <Link href="/login" className="text-admin-accent hover:underline decoration-2 underline-offset-8 transition-all">
+                <div className="mt-10 pt-8 border-t border-site-border text-center">
+                    <p className="text-[10px] font-black text-site-text-muted uppercase tracking-widest">
+                        Déjà inscrit ?{' '}
+                        <Link href="/login" className="text-site-accent hover:underline decoration-2 underline-offset-4 transition-all">
                             SE CONNECTER
                         </Link>
                     </p>
