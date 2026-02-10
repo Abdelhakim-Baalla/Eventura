@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Request, Patch, Param } from '@nestjs/common';
+import { Controller, Post, Get, Body, Request, Patch, Param, Query } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
@@ -14,10 +14,16 @@ export class ReservationsController {
         return this.reservationsService.create(evenementId, userId);
     }
 
-    @Get('my')
-    async findMy(@Request() req) {
+    @Patch(':id/cancel')
+    async cancel(@Param('id') id: string, @Request() req) {
         const userId = req.user.id;
-        return this.reservationsService.findMyReservations(userId);
+        return this.reservationsService.cancel(id, userId);
+    }
+
+    @Get('my')
+    async findMy(@Request() req, @Query('statut') statut?: StatutReservation) {
+        const userId = req.user.id;
+        return this.reservationsService.findMyReservations(userId, statut);
     }
 
     @Roles(Role.ADMIN, Role.SUPER_ADMIN)

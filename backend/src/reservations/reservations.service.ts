@@ -59,9 +59,14 @@ export class ReservationsService {
         return await this.reservationRepository.save(reservation);
     }
 
-    async findMyReservations(utilisateurId: string) {
+    async findMyReservations(utilisateurId: string, statut?: StatutReservation) {
+        const where: any = { utilisateurId };
+        if (statut) {
+            where.statut = statut;
+        }
+
         return await this.reservationRepository.find({
-            where: { utilisateurId },
+            where,
             relations: ['evenement'],
             order: { dateReservation: 'DESC' }
         });
@@ -107,6 +112,23 @@ export class ReservationsService {
             reservation.dateConfirmation = new Date();
         }
 
+        return await this.reservationRepository.save(reservation);
+    }
+
+    async cancel(id: string, utilisateurId: string) {
+        const reservation = await this.reservationRepository.findOne({
+            where: { id, utilisateurId }
+        });
+
+        if (!reservation) {
+            throw new NotFoundException('Réservation introuvable');
+        }
+
+        if (reservation.statut === StatutReservation.CONFIRME) {
+            throw new BadRequestException('Impossible d\'annuler une réservation déjà confirmée. Veuillez contacter l\'organisateur.');
+        }
+
+        reservation.statut = StatutReservation.ANNULE;
         return await this.reservationRepository.save(reservation);
     }
 }

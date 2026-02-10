@@ -14,75 +14,155 @@ interface Reservation {
         titre: string;
         dateHeureDebut: string;
         lieu: string;
-        image?: string;
+        imageAffiche?: string;
     };
 }
 
 export default function MyReservationsPage() {
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState('ALL');
 
     useEffect(() => {
-        api.get('/reservations/my')
-            .then(res => setReservations(res.data))
-            .catch(err => console.error(err))
-            .finally(() => setLoading(false));
+        fetchReservations();
     }, []);
+
+    const fetchReservations = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/reservations/my');
+            setReservations(res.data);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCancel = async (id: string) => {
+        if (!confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) return;
+        try {
+            await api.patch(`/reservations/${id}/cancel`);
+            alert('Réservation annulée avec succès.');
+            fetchReservations();
+        } catch (err: any) {
+            alert(err.response?.data?.message || 'Erreur lors de l\'annulation');
+        }
+    };
+
+    const handleDownloadPDF = (res: Reservation) => {
+        alert(`Téléchargement du ticket ${res.referenceTicket} en cours...\n(Simulation PDF)`);
+    };
+
+    const filteredReservations = reservations.filter(res =>
+        filter === 'ALL' ? true : res.statut === filter
+    );
 
     return (
         <div className="min-h-screen bg-gray-50 text-black">
-            <nav className="bg-white shadow-sm border-b">
+            <nav className="bg-white shadow-sm border-b sticky top-0 z-10">
                 <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link href="/" className="text-blue-600 font-bold">Eventura</Link>
-                    <h1 className="font-bold">Mes Tickets</h1>
-                    <Link href="/" className="text-sm text-gray-500 underline">Accueil</Link>
+                    <Link href="/" className="text-blue-600 font-black text-2xl italic">Eventura</Link>
+                    <h1 className="font-bold text-gray-700 hidden sm:block">Mes Réservations</h1>
+                    <Link href="/" className="text-sm bg-gray-100 px-4 py-2 rounded-lg font-bold hover:bg-gray-200 transition-colors">Accueil</Link>
                 </div>
             </nav>
 
             <main className="max-w-4xl mx-auto px-4 py-8">
+                <div className="mb-8">
+                    <h2 className="text-3xl font-black mb-2">Vos Tickets</h2>
+                    <p className="text-gray-500">Retrouvez toutes vos réservations et gérez vos places.</p>
+                </div>
+
+                <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+                    {['ALL', 'EN_ATTENTE', 'CONFIRME', 'ANNULE', 'REFUSE'].map(s => (
+                        <button
+                            key={s}
+                            onClick={() => setFilter(s)}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${filter === s
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                    : 'bg-white text-gray-500 border border-gray-100 hover:border-blue-200 hover:text-blue-600'
+                                }`}
+                        >
+                            {s === 'ALL' ? 'Tous les tickets' : s.replace('_', ' ')}
+                        </button>
+                    ))}
+                </div>
+
                 {loading ? (
-                    <div className="flex justify-center py-12">
+                    <div className="flex justify-center py-20">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                     </div>
-                ) : reservations.length === 0 ? (
-                    <div className="text-center py-20 bg-white rounded-xl border shadow-sm">
-                        <span className="text-5xl mb-4 block">🎫</span>
-                        <h2 className="text-xl font-bold mb-2">Vous n'avez pas encore de tickets</h2>
-                        <p className="text-gray-500 mb-6">Découvrez nos événements et réservez votre place !</p>
-                        <Link href="/" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">Explorer les événements</Link>
+                ) : filteredReservations.length === 0 ? (
+                    <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200 shadow-sm">
+                        <span className="text-6xl mb-6 block">🎫</span>
+                        <h2 className="text-2xl font-black mb-2">Rien à afficher ici</h2>
+                        <p className="text-gray-500 mb-8 max-w-sm mx-auto">Vous n'avez aucune réservation correspondant à ce filtre pour le moment.</p>
+                        <Link href="/" className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 inline-block">Explorer les événements</Link>
                     </div>
                 ) : (
-                    <div className="space-y-6">
-                        {reservations.map(res => (
-                            <div key={res.id} className="bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col md:flex-row">
-                                <div className="w-full md:w-48 h-32 md:h-auto bg-gray-200">
-                                    {res.evenement.image ? (
-                                        <img src={res.evenement.image} alt={res.evenement.titre} className="w-full h-full object-cover" />
+                    <div className="grid gap-6">
+                        {filteredReservations.map(res => (
+                            <div key={res.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row transition-all hover:shadow-xl hover:shadow-gray-100">
+                                <div className="w-full md:w-56 h-48 md:h-auto bg-gray-100 flex-shrink-0 relative">
+                                    {res.evenement.imageAffiche ? (
+                                        <img src={res.evenement.imageAffiche} alt={res.evenement.titre} className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">Pas d'image</div>
+                                        <div className="w-full h-full flex items-center justify-center text-gray-300 font-black text-xs uppercase p-4 text-center">Affiche non disponible</div>
                                     )}
+                                    <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-black uppercase shadow-lg ${res.statut === 'CONFIRME' ? 'bg-green-500 text-white' :
+                                            res.statut === 'REFUSE' ? 'bg-red-500 text-white' :
+                                                res.statut === 'ANNULE' ? 'bg-gray-500 text-white' :
+                                                    'bg-yellow-500 text-white'
+                                        }`}>
+                                        {res.statut.replace('_', ' ')}
+                                    </div>
                                 </div>
-                                <div className="p-6 flex-1">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="text-lg font-bold text-blue-600">{res.evenement.titre}</h3>
-                                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase ${res.statut === 'CONFIRME' ? 'bg-green-100 text-green-800' :
-                                            res.statut === 'REFUSE' ? 'bg-red-100 text-red-800' :
-                                                res.statut === 'ANNULE' ? 'bg-gray-100 text-gray-800' :
-                                                    'bg-yellow-100 text-yellow-800'
-                                            }`}>
-                                            {res.statut}
-                                        </span>
-                                    </div>
-                                    <div className="text-sm text-gray-600 space-y-1 mb-4">
-                                        <p>📅 {new Date(res.evenement.dateHeureDebut).toLocaleString()}</p>
-                                        <p>📍 {res.evenement.lieu}</p>
-                                    </div>
-                                    <div className="border-t border-dashed pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                        <div>
-                                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Référence Ticket</p>
-                                            <p className="font-mono font-bold text-gray-800">{res.referenceTicket}</p>
+                                <div className="p-8 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <h3 className="text-2xl font-black text-gray-900 mb-4 line-clamp-1">{res.evenement.titre}</h3>
+                                        <div className="flex flex-wrap gap-6 text-sm text-gray-500 mb-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 font-bold">📅</div>
+                                                <div>
+                                                    <p className="text-[10px] uppercase font-black text-gray-300 tracking-tighter">Date</p>
+                                                    <p className="font-bold text-gray-700">{new Date(res.evenement.dateHeureDebut).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 font-bold">📍</div>
+                                                <div>
+                                                    <p className="text-[10px] uppercase font-black text-gray-300 tracking-tighter">Lieu</p>
+                                                    <p className="font-bold text-gray-700 line-clamp-1">{res.evenement.lieu}</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <Link href={`/events/${res.evenement.id}`} className="text-sm text-blue-600 font-medium hover:underline">Voir l'événement →</Link>
+                                    </div>
+
+                                    <div className="border-t border-gray-50 pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                                        <div className="bg-gray-50 px-4 py-2 rounded-2xl inline-block border border-gray-100">
+                                            <p className="text-[9px] text-gray-400 uppercase font-black tracking-widest mb-0.5">Référence Ticket</p>
+                                            <p className="font-mono font-black text-blue-600 text-base">{res.referenceTicket}</p>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            {res.statut === 'CONFIRME' && (
+                                                <button
+                                                    onClick={() => handleDownloadPDF(res)}
+                                                    className="flex items-center gap-2 text-sm bg-blue-600 text-white px-6 py-2.5 rounded-2xl font-black hover:bg-black transition-all shadow-lg shadow-blue-100 hover:shadow-none"
+                                                >
+                                                    📥 Ticket PDF
+                                                </button>
+                                            )}
+                                            {res.statut === 'EN_ATTENTE' && (
+                                                <button
+                                                    onClick={() => handleCancel(res.id)}
+                                                    className="text-sm text-red-500 font-black hover:bg-red-50 px-4 py-2 rounded-xl transition-colors"
+                                                >
+                                                    Annuler
+                                                </button>
+                                            )}
+                                            <Link href={`/events/${res.evenement.id}`} className="text-sm text-gray-400 font-bold hover:text-blue-600 transition-colors">Détails</Link>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
