@@ -21,9 +21,14 @@ export class ReservationsController {
     }
 
     @Get('my')
-    async findMy(@Request() req, @Query('statut') statut?: StatutReservation) {
+    async findMy(
+        @Request() req,
+        @Query('statut') statut?: StatutReservation,
+        @Query('page') page: number = 1,
+        @Query('limit') limit: number = 10
+    ) {
         const userId = req.user.id;
-        return this.reservationsService.findMyReservations(userId, statut);
+        return this.reservationsService.findMyReservations(userId, page, limit, statut);
     }
 
     @Roles(Role.ADMIN, Role.SUPER_ADMIN)

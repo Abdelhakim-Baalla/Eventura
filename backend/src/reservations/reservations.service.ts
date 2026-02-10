@@ -59,17 +59,26 @@ export class ReservationsService {
         return await this.reservationRepository.save(reservation);
     }
 
-    async findMyReservations(utilisateurId: string, statut?: StatutReservation) {
+    async findMyReservations(utilisateurId: string, page: number = 1, limit: number = 10, statut?: StatutReservation) {
         const where: any = { utilisateurId };
         if (statut) {
             where.statut = statut;
         }
 
-        return await this.reservationRepository.find({
+        const [items, total] = await this.reservationRepository.findAndCount({
             where,
             relations: ['evenement'],
-            order: { dateReservation: 'DESC' }
+            order: { dateReservation: 'DESC' },
+            skip: (page - 1) * limit,
+            take: limit,
         });
+
+        return {
+            items,
+            total,
+            page,
+            lastPage: Math.ceil(total / limit)
+        };
     }
 
     async findAllForAdmin(adminId: string) {
