@@ -20,9 +20,16 @@ export class EventsController {
   }
 
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Get('admin/stats')
+  async getStats(@Request() req) {
+    const adminId = req.user.id;
+    return this.eventsService.getStats(adminId);
+  }
+
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Get('admin')
   async findAllForAdmin(@Request() req) {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     return this.eventsService.findAllForAdmin(userId);
   }
 
@@ -41,7 +48,7 @@ export class EventsController {
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Post()
   async create(@Body() createEventDto: CreateEventDto, @Request() req) {
-    const createurId = req.user.sub;
+    const createurId = req.user.id;
     return this.eventsService.create(createEventDto, createurId);
   }
 

@@ -16,6 +16,7 @@ export default function CreateEventPage() {
         dateHeureFin: '',
         lieu: '',
         capaciteMax: 1,
+        prix: 0,
         imageAffiche: '',
         categorieId: '',
     });
@@ -212,17 +213,32 @@ export default function CreateEventPage() {
                     />
                 </div>
 
-                <div>
-                    <label className="block font-medium mb-1">Capacité max *</label>
-                    <input
-                        type="number"
-                        name="capaciteMax"
-                        value={formData.capaciteMax}
-                        onChange={handleChange}
-                        required
-                        min={1}
-                        className="w-full border rounded p-2"
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block font-medium mb-1">Capacité max *</label>
+                        <input
+                            type="number"
+                            name="capaciteMax"
+                            value={formData.capaciteMax}
+                            onChange={handleChange}
+                            required
+                            min={1}
+                            className="w-full border rounded p-2"
+                        />
+                    </div>
+                    <div>
+                        <label className="block font-medium mb-1">Prix (€) *</label>
+                        <input
+                            type="number"
+                            name="prix"
+                            value={formData.prix}
+                            onChange={handleChange}
+                            required
+                            min={0}
+                            step="0.01"
+                            className="w-full border rounded p-2"
+                        />
+                    </div>
                 </div>
 
                 <div>

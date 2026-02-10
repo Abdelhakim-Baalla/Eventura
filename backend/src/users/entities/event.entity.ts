@@ -35,6 +35,9 @@ export class Event {
   @Column({ type: 'int', name: 'capacite_max' })
   capaciteMax: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  prix: number;
+
   @Column({ nullable: true, name: 'image_affiche' })
   imageAffiche: string;
 

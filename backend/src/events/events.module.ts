@@ -4,11 +4,12 @@ import { EventsController } from './events.controller';
 import { EventsService } from './events.service';
 import { Event } from '../users/entities/event.entity';
 import { Category } from '../users/entities/category.entity';
+import { Reservation } from '../users/entities/reservation.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Event, Category])],
+  imports: [TypeOrmModule.forFeature([Event, Category, Reservation])],
   controllers: [EventsController],
   providers: [EventsService],
   exports: [EventsService],
 })
-export class EventsModule {}
+export class EventsModule { }
