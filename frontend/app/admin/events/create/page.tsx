@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import api from '@/lib/api';
@@ -22,12 +22,19 @@ export default function CreateEventPage() {
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [categories, setCategories] = useState<{ id: string; nom: string }[]>([]);
+
+    useEffect(() => {
+        api.get('/events/categories')
+            .then(res => setCategories(res.data))
+            .catch(err => console.error("Erreur chargement catégories", err));
+    }, []);
 
     const [showPreview, setShowPreview] = useState(false);
 
     const router = useRouter();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -93,6 +100,10 @@ export default function CreateEventPage() {
                         <div>
                             <span className="font-medium">Lieu : </span>
                             {formData.lieu || '—'}
+                        </div>
+                        <div>
+                            <span className="font-medium">Catégorie : </span>
+                            {categories.find(c => c.id === formData.categorieId)?.nom || '—'}
                         </div>
                         <div>
                             <span className="font-medium">Capacité : </span>
@@ -224,16 +235,21 @@ export default function CreateEventPage() {
                 </div>
 
                 <div>
-                    <label className="block font-medium mb-1">ID Catégorie *</label>
-                    <input
-                        type="text"
+                    <label className="block font-medium mb-1">Catégorie</label>
+                    <select
                         name="categorieId"
                         value={formData.categorieId}
                         onChange={handleChange}
                         required
                         className="w-full border rounded p-2"
-                        placeholder="UUID de la catégorie"
-                    />
+                    >
+                        <option value="">Sélectionner une catégorie</option>
+                        {categories.map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                                {cat.nom}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="flex gap-4">

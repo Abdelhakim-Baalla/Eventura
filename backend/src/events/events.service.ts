@@ -17,7 +17,7 @@ export class EventsService {
     private eventRepository: Repository<Event>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
-  ) {}
+  ) { }
 
   async create(
     createEventDto: CreateEventDto,
@@ -114,5 +114,9 @@ export class EventsService {
     });
 
     return await this.eventRepository.save(event);
+  }
+
+  async findAllCategories(): Promise<Category[]> {
+    return await this.categoryRepository.find();
   }
 }

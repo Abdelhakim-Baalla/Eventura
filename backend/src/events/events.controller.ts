@@ -1,4 +1,4 @@
-import { Controller, Post, Put, Body, Param, Request } from '@nestjs/common';
+import { Controller, Post, Put, Body, Param, Request, Get } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -6,7 +6,12 @@ import { Role } from '../common/enums/role.enum';
 
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(private readonly eventsService: EventsService) { }
+
+  @Get('categories')
+  async getCategories() {
+    return this.eventsService.findAllCategories();
+  }
 
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Post()
