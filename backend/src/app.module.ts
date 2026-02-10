@@ -9,6 +9,9 @@ import { Category } from './users/entities/category.entity';
 import { Event } from './users/entities/event.entity';
 import { Reservation } from './users/entities/reservation.entity';
 import { AuthModule } from './auth/auth.module';
+import { EventsModule } from './events/events.module';
+import { CategoriesModule } from './categories/categories.module';
+import { ReservationsModule } from './reservations/reservations.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -30,6 +33,9 @@ import { RolesGuard } from './auth/guards/roles.guard';
       logging: true,
     }),
     AuthModule,
+    EventsModule,
+    CategoriesModule,
+    ReservationsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -44,4 +50,4 @@ import { RolesGuard } from './auth/guards/roles.guard';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
