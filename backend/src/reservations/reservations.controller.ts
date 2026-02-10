@@ -7,13 +7,13 @@ export class ReservationsController {
 
     @Post()
     async create(@Body('evenementId') evenementId: string, @Request() req) {
-        const userId = req.user.sub;
+        const userId = req.user.id;
         return this.reservationsService.create(evenementId, userId);
     }
 
     @Get('my')
     async findMy(@Request() req) {
-        const userId = req.user.sub;
+        const userId = req.user.id;
         return this.reservationsService.findMyReservations(userId);
     }
 }
