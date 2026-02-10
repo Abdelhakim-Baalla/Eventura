@@ -148,9 +148,18 @@ export class EventsService {
     return await this.eventRepository.save(event);
   }
 
-  async findAllForAdmin(): Promise<Event[]> {
+  async findAllForAdmin(createurId: string): Promise<Event[]> {
     return await this.eventRepository.find({
+      where: { createurId },
       order: { dateCreation: 'DESC' },
+      relations: ['categorie'],
+    });
+  }
+
+  async findAllPublished(): Promise<Event[]> {
+    return await this.eventRepository.find({
+      where: { statut: StatutEvenement.PUBLIE },
+      order: { dateHeureDebut: 'ASC' },
       relations: ['categorie'],
     });
   }

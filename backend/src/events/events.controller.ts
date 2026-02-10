@@ -3,6 +3,7 @@ import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
+import { Public } from '../common/decorators/public.decorator';
 
 @Controller('events')
 export class EventsController {
@@ -20,8 +21,15 @@ export class EventsController {
 
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Get('admin')
-  async findAllForAdmin() {
-    return this.eventsService.findAllForAdmin();
+  async findAllForAdmin(@Request() req) {
+    const userId = req.user.sub;
+    return this.eventsService.findAllForAdmin(userId);
+  }
+
+  @Public()
+  @Get()
+  async findAllPublished() {
+    return this.eventsService.findAllPublished();
   }
 
   @Get(':id')
