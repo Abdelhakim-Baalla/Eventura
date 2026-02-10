@@ -40,6 +40,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
         try {
             await api.post('/reservations', { evenementId: id });
             alert('Réservation réussie ! Votre place est confirmée.');
+            router.push('/reservations');
         } catch (err: any) {
             if (err.response?.status === 401) {
                 router.push('/login');

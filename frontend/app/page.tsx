@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import Link from 'next/link';
+import { authService } from '@/lib/auth';
 
 interface Event {
   id: string;
@@ -20,12 +21,21 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const [user, setUser] = useState<any>(null);
+
   useEffect(() => {
+    setUser(authService.getUser());
     api.get('/events')
       .then(res => setEvents(res.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleLogout = () => {
+    authService.logout();
+    setUser(null);
+    window.location.reload();
+  };
 
   const filteredEvents = events.filter(event =>
     event.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,10 +48,21 @@ export default function Home() {
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-blue-600 italic">Eventura</Link>
-          <div className="space-x-4">
-            <Link href="/reservations" className="text-gray-600 hover:text-blue-600 font-medium">Mes Tickets</Link>
-            <Link href="/login" className="text-gray-600 hover:text-blue-600">Connexion</Link>
-            <Link href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg">S'inscrire</Link>
+          <div className="space-x-4 flex items-center">
+            {user ? (
+              <>
+                <Link href="/reservations" className="text-gray-600 hover:text-blue-600 font-medium">Mes Tickets</Link>
+                {user.role === 'ADMIN' && (
+                  <Link href="/admin/events" className="text-blue-600 hover:underline font-medium">Dashboard Admin</Link>
+                )}
+                <button onClick={handleLogout} className="text-red-500 hover:text-red-700 font-medium">Déconnexion</button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-gray-600 hover:text-blue-600">Connexion</Link>
+                <Link href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg">S'inscrire</Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
