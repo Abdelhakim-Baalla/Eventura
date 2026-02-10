@@ -39,6 +39,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-blue-600 italic">Eventura</Link>
           <div className="space-x-4">
+            <Link href="/reservations" className="text-gray-600 hover:text-blue-600 font-medium">Mes Tickets</Link>
             <Link href="/login" className="text-gray-600 hover:text-blue-600">Connexion</Link>
             <Link href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg">S'inscrire</Link>
           </div>

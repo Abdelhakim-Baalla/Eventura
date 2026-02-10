@@ -9,6 +9,7 @@ import { Event } from '../users/entities/event.entity';
 import { Category } from '../users/entities/category.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { StatutEvenement } from '../common/enums/statut-evenement.enum';
+import { StatutReservation } from '../common/enums/statut-reservation.enum';
 
 @Injectable()
 export class EventsService {
@@ -164,15 +165,29 @@ export class EventsService {
     });
   }
 
-  async findOne(id: string): Promise<Event> {
+  async findOne(id: string): Promise<any> {
     const event = await this.eventRepository.findOne({
       where: { id },
-      relations: ['categorie'],
+      relations: ['categorie', 'reservations'],
     });
+
     if (!event) {
       throw new NotFoundException('Événement introuvable');
     }
-    return event;
+
+    const confirmedReservations = event.reservations.filter(
+      (r) => r.statut === StatutReservation.CONFIRME,
+    ).length;
+
+    const placesRestantes = Math.max(0, event.capaciteMax - confirmedReservations);
+
+    // On retire les réservations de l'objet pour ne pas alourdir la réponse
+    const { reservations, ...eventData } = event;
+
+    return {
+      ...eventData,
+      placesRestantes,
+    };
   }
 
   async seedCategories() {

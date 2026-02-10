@@ -13,15 +13,18 @@ interface Event {
     dateHeureFin: string;
     lieu: string;
     prix: number;
-    capacite: number;
+    capaciteMax: number;
+    placesRestantes: number;
     categorie: { nom: string };
     image?: string;
 }
 
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
+    const router = useRouter();
     const [event, setEvent] = useState<Event | null>(null);
     const [loading, setLoading] = useState(true);
+    const [reserving, setReserving] = useState(false);
 
     useEffect(() => {
         api.get(`/events/${id}`)
@@ -29,6 +32,24 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
             .catch(err => console.error(err))
             .finally(() => setLoading(false));
     }, [id]);
+
+    const handleReserve = async () => {
+        if (!confirm('Confirmer votre réservation pour cet événement ?')) return;
+
+        setReserving(true);
+        try {
+            await api.post('/reservations', { evenementId: id });
+            alert('Réservation réussie ! Votre place est confirmée.');
+        } catch (err: any) {
+            if (err.response?.status === 401) {
+                router.push('/login');
+            } else {
+                alert(err.response?.data?.message || 'Une erreur est survenue.');
+            }
+        } finally {
+            setReserving(false);
+        }
+    };
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-white">
@@ -93,8 +114,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                             <div className="flex items-center gap-3">
                                 <span className="text-2xl">👥</span>
                                 <div>
-                                    <p className="font-bold">Capacité</p>
-                                    <p className="text-sm">{event.capacite} personnes max</p>
+                                    <p className="font-bold">Places disponibles</p>
+                                    <p className={`text-sm font-bold ${event.placesRestantes < 10 ? 'text-red-500' : 'text-green-600'}`}>
+                                        {event.placesRestantes} / {event.capaciteMax} restantes
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
@@ -113,10 +136,24 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                             </div>
                         </div>
 
-                        <div className="mt-12 sticky bottom-8 sm:static">
-                            <button className="w-full bg-blue-600 text-white text-lg font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-colors transform active:scale-95">
-                                Réserver ma place
-                            </button>
+                        <div className="mt-12 sticky bottom-8 sm:static text-black">
+                            {new Date(event.dateHeureDebut) < new Date() ? (
+                                <button disabled className="w-full bg-gray-400 text-white text-lg font-bold py-4 rounded-xl cursor-not-allowed">
+                                    Événement passé
+                                </button>
+                            ) : event.placesRestantes === 0 ? (
+                                <button disabled className="w-full bg-red-400 text-white text-lg font-bold py-4 rounded-xl cursor-not-allowed">
+                                    Complet
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleReserve}
+                                    disabled={reserving}
+                                    className="w-full bg-blue-600 text-white text-lg font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-colors transform active:scale-95 disabled:bg-gray-400"
+                                >
+                                    {reserving ? 'Réservation en cours...' : 'Réserver ma place'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
