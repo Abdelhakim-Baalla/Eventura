@@ -37,117 +37,146 @@ export default function AdminEventsPage() {
     }, []);
 
     const handlePublish = async (id: string) => {
-        if (!confirm('Voulez-vous vraiment publier cet événement ?')) return;
+        if (!confirm('Publier cet événement ?')) return;
         try {
             await api.patch(`/events/${id}/publish`);
-            fetchEvents(); // Rafraîchir la liste
+            fetchEvents();
         } catch (err) {
             alert('Erreur lors de la publication');
         }
     };
 
     const handleCancel = async (id: string) => {
-        if (!confirm('Voulez-vous vraiment annuler cet événement ?')) return;
+        if (!confirm('Annuler cet événement ?')) return;
         try {
             await api.patch(`/events/${id}/cancel`);
-            fetchEvents(); // Rafraîchir la liste
+            fetchEvents();
         } catch (err) {
             alert('Erreur lors de l\'annulation');
         }
     };
 
-    const getStatusBadge = (statut: string) => {
+    const getStatusStyles = (statut: string) => {
         switch (statut) {
             case 'BROUILLON':
-                return <span className="px-2 py-1 rounded bg-gray-200 text-gray-800 text-xs font-bold">BROUILLON</span>;
+                return 'bg-gray-100 text-gray-500 border-gray-200';
             case 'PUBLIE':
-                return <span className="px-2 py-1 rounded bg-green-200 text-green-800 text-xs font-bold">PUBLIÉ</span>;
+                return 'bg-green-50 text-green-600 border-green-100';
             case 'ANNULE':
-                return <span className="px-2 py-1 rounded bg-red-200 text-red-800 text-xs font-bold">ANNULÉ</span>;
+                return 'bg-red-50 text-red-500 border-red-100';
             default:
-                return <span>{statut}</span>;
+                return 'bg-gray-50 text-gray-400 border-gray-100';
         }
     };
 
-    if (isLoading) return <div className="p-8">Chargement...</div>;
-    if (error) return <div className="p-8 text-red-600">{error}</div>;
+    if (isLoading) return (
+        <div className="flex justify-center items-center h-[60vh]">
+            <div className="w-8 h-8 border-2 border-gray-100 border-t-black rounded-full animate-spin"></div>
+        </div>
+    );
 
     return (
-        <div className="p-8">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Gestion des événements</h1>
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+                <div>
+                    <h1 className="text-4xl font-black text-black tracking-tighter mb-2">Événements</h1>
+                    <p className="text-gray-400 font-medium">Gérez votre catalogue d'expériences.</p>
+                </div>
                 <Link
                     href="/admin/events/create"
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    className="bg-black text-white px-8 py-4 rounded-2xl font-black hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 flex items-center gap-3"
                 >
-                    + Créer un événement
+                    <span className="text-xl">+</span>
+                    Nvel Événement
                 </Link>
             </div>
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Affiche</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lieu</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {events.map((event) => (
-                            <tr key={event.id}>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    {event.imageAffiche ? (
-                                        <img src={event.imageAffiche} alt={event.titre} className="h-10 w-10 object-cover rounded" />
-                                    ) : (
-                                        <div className="h-10 w-10 bg-gray-200 rounded flex items-center justify-center text-gray-400">?</div>
-                                    )}
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="text-sm font-medium text-gray-900">{event.titre}</div>
-                                    <div className="text-sm text-gray-500">{event.categorie?.nom}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {new Date(event.dateHeureDebut).toLocaleDateString()}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {event.lieu}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    {getStatusBadge(event.statut)}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                    {event.statut === 'BROUILLON' && (
-                                        <button
-                                            onClick={() => handlePublish(event.id)}
-                                            className="text-green-600 hover:text-green-900"
-                                        >
-                                            Publier
-                                        </button>
-                                    )}
-                                    {event.statut === 'PUBLIE' && (
-                                        <button
-                                            onClick={() => handleCancel(event.id)}
-                                            className="text-red-600 hover:text-red-900"
-                                        >
-                                            Annuler
-                                        </button>
-                                    )}
-                                    <Link
-                                        href={`/admin/events/${event.id}/edit`}
-                                        className="text-blue-600 hover:text-blue-900"
-                                    >
-                                        Modifier
-                                    </Link>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            {error ? (
+                <div className="p-8 bg-red-50 text-red-500 rounded-3xl border border-red-100 font-bold">{error}</div>
+            ) : (
+                <div className="bg-white rounded-[2.5rem] border border-[#F0F0F3] overflow-hidden shadow-sm">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-[#F0F0F3]">
+                            <thead>
+                                <tr className="bg-gray-50/50">
+                                    <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Événement</th>
+                                    <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Détails</th>
+                                    <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Statut</th>
+                                    <th className="px-8 py-6 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#F0F0F3]">
+                                {events.map((event) => (
+                                    <tr key={event.id} className="hover:bg-[#FBFBFE] transition-colors group">
+                                        <td className="px-8 py-6 whitespace-nowrap">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-16 w-16 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 border border-[#F0F0F3]">
+                                                    {event.imageAffiche ? (
+                                                        <img src={event.imageAffiche} alt={event.titre} className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                    ) : (
+                                                        <div className="h-full w-full flex items-center justify-center text-gray-300 font-black">?</div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-black text-black">{event.titre}</div>
+                                                    <div className="text-[10px] font-bold text-gray-400 uppercase mt-1 px-2 py-0.5 rounded bg-gray-50 inline-block">
+                                                        {event.categorie?.nom}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6 whitespace-nowrap">
+                                            <div className="text-sm font-bold text-gray-700">📅 {new Date(event.dateHeureDebut).toLocaleDateString()}</div>
+                                            <div className="text-xs text-gray-400 mt-1">📍 {event.lieu}</div>
+                                        </td>
+                                        <td className="px-8 py-6 whitespace-nowrap">
+                                            <span className={`px-3 py-1.5 rounded-full text-[10px] font-black border ${getStatusStyles(event.statut)}`}>
+                                                {event.statut}
+                                            </span>
+                                        </td>
+                                        <td className="px-8 py-6 whitespace-nowrap text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                {event.statut === 'BROUILLON' && (
+                                                    <button
+                                                        onClick={() => handlePublish(event.id)}
+                                                        className="p-2.5 rounded-xl bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition-all"
+                                                        title="Publier"
+                                                    >
+                                                        🚀
+                                                    </button>
+                                                )}
+                                                {event.statut === 'PUBLIE' && (
+                                                    <button
+                                                        onClick={() => handleCancel(event.id)}
+                                                        className="p-2.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                                                        title="Annuler"
+                                                    >
+                                                        🚫
+                                                    </button>
+                                                )}
+                                                <Link
+                                                    href={`/admin/events/${event.id}/edit`}
+                                                    className="p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:bg-black hover:text-white transition-all"
+                                                    title="Modifier"
+                                                >
+                                                    ✏️
+                                                </Link>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {events.length === 0 && (
+                                    <tr>
+                                        <td colSpan={4} className="px-8 py-20 text-center">
+                                            <p className="text-gray-400 font-medium">Aucun événement pour le moment.</p>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

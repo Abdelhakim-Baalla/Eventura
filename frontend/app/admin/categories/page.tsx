@@ -37,7 +37,7 @@ export default function CategoriesPage() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) return;
+        if (!confirm('Voulez-vous supprimer cette catégorie ?')) return;
         try {
             await api.delete(`/categories/${id}`);
             loadCats();
@@ -47,41 +47,52 @@ export default function CategoriesPage() {
     };
 
     return (
-        <div className="p-8 max-w-2xl">
-            <h1 className="text-2xl font-bold mb-6">Gestion des Catégories</h1>
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-3xl">
+            <header className="mb-12">
+                <h1 className="text-4xl font-black text-black tracking-tighter mb-2">Catégories</h1>
+                <p className="text-gray-400 font-medium tracking-tight">Organisez vos événements par thématiques.</p>
+            </header>
 
-            {error && <div className="text-red-600 mb-4">{error}</div>}
+            {error && <div className="p-4 bg-red-50 text-red-500 rounded-2xl mb-6 font-bold text-sm border border-red-100">{error}</div>}
 
-            <form onSubmit={handleAdd} className="flex gap-4 mb-8">
-                <input
-                    type="text"
-                    value={newCat}
-                    onChange={(e) => setNewCat(e.target.value)}
-                    placeholder="Nom de la nouvelle catégorie"
-                    className="flex-1 border p-2 rounded"
-                    required
-                />
+            <form onSubmit={handleAdd} className="flex gap-4 mb-12">
+                <div className="flex-1 relative group">
+                    <input
+                        type="text"
+                        value={newCat}
+                        onChange={(e) => setNewCat(e.target.value)}
+                        placeholder="Ex: Musique, Sport, Technologie..."
+                        className="w-full bg-white border border-[#F0F0F3] rounded-2xl py-4 px-6 text-sm font-bold focus:outline-none focus:border-black transition-all placeholder:text-gray-300"
+                        required
+                    />
+                </div>
                 <button
                     type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    className="bg-black text-white px-8 py-4 rounded-2xl font-black hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 uppercase text-[10px] tracking-widest"
                 >
                     Ajouter
                 </button>
             </form>
 
-            <div className="bg-white rounded shadow text-black">
+            <div className="bg-white rounded-[2.5rem] border border-[#F0F0F3] shadow-sm overflow-hidden">
+                <div className="px-10 py-6 border-b border-[#F0F0F3] bg-gray-50/50">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Liste des catégories</p>
+                </div>
                 {categories.length === 0 ? (
-                    <div className="p-4 text-gray-500">Aucune catégorie. Ajoutez-en une !</div>
+                    <div className="p-16 text-center">
+                        <p className="text-gray-300 font-black italic">Aucune catégorie disponible.</p>
+                    </div>
                 ) : (
-                    <ul className="divide-y">
+                    <ul className="divide-y divide-[#F0F0F3]">
                         {categories.map((cat) => (
-                            <li key={cat.id} className="flex justify-between items-center p-4 hover:bg-gray-50">
-                                <span className="font-medium">{cat.nom}</span>
+                            <li key={cat.id} className="flex justify-between items-center px-10 py-6 hover:bg-[#FBFBFE] transition-colors group">
+                                <span className="font-black text-gray-800 tracking-tight">{cat.nom}</span>
                                 <button
                                     onClick={() => handleDelete(cat.id)}
-                                    className="text-red-500 hover:text-red-700"
+                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-all font-bold"
+                                    title="Supprimer"
                                 >
-                                    Supprimer
+                                    ✕
                                 </button>
                             </li>
                         ))}

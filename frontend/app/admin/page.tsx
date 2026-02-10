@@ -30,120 +30,95 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         fetchStats();
-        // Auto-refresh toutes les 30 secondes (EV-134)
         const interval = setInterval(fetchStats, 30000);
         return () => clearInterval(interval);
     }, []);
 
     if (loading) return (
-        <div className="flex h-full items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="flex h-[60vh] items-center justify-center">
+            <div className="w-12 h-12 border-4 border-gray-100 border-t-black rounded-full animate-spin"></div>
         </div>
     );
 
     return (
-        <div className="p-8 text-black">
-            <header className="mb-8 flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-black">Tableau de Bord</h1>
-                    <p className="text-gray-500 text-lg">Monitoring de vos événements en temps réel</p>
-                </div>
-                <button
-                    onClick={fetchStats}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="Actualiser"
-                >
-                    🔄
-                </button>
-            </header>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Hero Header */}
+            <div className="mb-16">
+                <h1 className="text-5xl font-black text-black tracking-tighter mb-4">Aperçu</h1>
+                <p className="text-gray-400 font-medium max-w-lg leading-relaxed">
+                    Visualisez les performances de vos événements et la croissance de votre communauté en temps réel.
+                </p>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                {/* Ligne 1 - KPIs Principaux */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                        <span className="text-3xl">📅</span>
-                        <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded uppercase">Total</span>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div className="bg-white p-10 rounded-[2.5rem] border border-[#F0F0F3] hover:shadow-2xl hover:shadow-gray-100 transition-all duration-500 group">
+                    <div className="flex justify-between items-center mb-8">
+                        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">📅</div>
+                        <span className="text-[10px] font-black tracking-widest text-gray-300 uppercase">Événements</span>
                     </div>
-                    <p className="text-gray-500 font-medium">Événements</p>
-                    <p className="text-3xl font-black">{stats?.totalEvents || 0}</p>
-                    <p className="text-xs text-blue-600 mt-2 font-bold">{stats?.upcomingEvents || 0} à venir</p>
+                    <p className="text-5xl font-black text-black mb-2 tracking-tighter">{stats?.totalEvents || 0}</p>
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                        <p className="text-sm font-bold text-gray-400">{stats?.upcomingEvents || 0} Prochains</p>
+                    </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                        <span className="text-3xl">🎟️</span>
-                        <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-1 rounded uppercase">Tickets</span>
+                <div className="bg-white p-10 rounded-[2.5rem] border border-[#F0F0F3] hover:shadow-2xl hover:shadow-gray-100 transition-all duration-500 group">
+                    <div className="flex justify-between items-center mb-8">
+                        <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">🎫</div>
+                        <span className="text-[10px] font-black tracking-widest text-gray-300 uppercase">Tickets</span>
                     </div>
-                    <p className="text-gray-500 font-medium">Réservations</p>
-                    <p className="text-3xl font-black">{stats?.totalReservations || 0}</p>
-                    <p className="text-xs text-green-600 mt-2 font-bold">{stats?.totalConfirmed || 0} confirmées</p>
+                    <p className="text-5xl font-black text-black mb-2 tracking-tighter">{stats?.totalReservations || 0}</p>
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                        <p className="text-sm font-bold text-gray-400">{stats?.totalConfirmed || 0} Confirmés</p>
+                    </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                        <span className="text-3xl">💰</span>
-                        <span className="text-[10px] font-bold bg-yellow-100 text-yellow-700 px-2 py-1 rounded uppercase">Revenus</span>
+                <div className="bg-white p-10 rounded-[2.5rem] border border-[#F0F0F3] hover:shadow-2xl hover:shadow-gray-100 transition-all duration-500 group">
+                    <div className="flex justify-between items-center mb-8">
+                        <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">💰</div>
+                        <span className="text-[10px] font-black tracking-widest text-gray-300 uppercase">Revenus</span>
                     </div>
-                    <p className="text-gray-500 font-medium">Chiffre d'Affaire</p>
-                    <p className="text-3xl font-black text-blue-600">{(stats?.totalRevenue || 0).toLocaleString()} €</p>
-                    <p className="text-xs text-gray-400 mt-2 font-bold italic text">Basé sur les places confirmées</p>
+                    <p className="text-5xl font-black text-black mb-2 tracking-tighter">{(stats?.totalRevenue || 0).toLocaleString()}€</p>
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
+                        <p className="text-sm font-bold text-gray-400">Total Brut</p>
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                {/* Taux de remplissage (EV-129) */}
-                <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                    <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                        📈 Taux de Remplissage Global
-                    </h2>
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-end">
-                            <p className="text-4xl font-black text-blue-600">{stats?.occupancyRate || 0}%</p>
-                            <p className="text-sm text-gray-500">Moyenne sur tous les événements</p>
+            {/* Monitoring Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <div className="lg:col-span-3 bg-white p-12 rounded-[3rem] border border-[#F0F0F3] relative overflow-hidden">
+                    <h2 className="text-2xl font-black mb-10 tracking-tight">Occupation Moyenne</h2>
+                    <div className="relative pt-8">
+                        <div className="flex justify-between items-end mb-4">
+                            <span className="text-6xl font-black tracking-tighter text-black">{stats?.occupancyRate || 0}%</span>
+                            <span className="text-sm font-bold text-gray-400 mb-2">Taux de remplissage</span>
                         </div>
-                        <div className="w-full bg-gray-100 h-4 rounded-full overflow-hidden">
+                        <div className="h-4 w-full bg-gray-50 rounded-full overflow-hidden border border-gray-100">
                             <div
-                                className="bg-blue-600 h-full transition-all duration-1000 ease-out"
+                                className="h-full bg-black rounded-full transition-all duration-1000 ease-out"
                                 style={{ width: `${stats?.occupancyRate || 0}%` }}
                             ></div>
                         </div>
-                        <p className="text-xs text-gray-400 italic">
-                            Le remplissage est calculé sur le ratio places confirmées / capacité maximum totale.
-                        </p>
                     </div>
                 </div>
 
-                {/* Actions Rapides */}
-                <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                    <h2 className="text-xl font-bold mb-6">🔗 Accès Rapides</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                        <Link href="/admin/events/create" className="p-4 bg-gray-50 rounded-2xl hover:bg-black hover:text-white transition-all text-center">
-                            <span className="block text-xl mb-1">➕</span>
-                            <span className="font-bold text-sm">Nvel Event</span>
-                        </Link>
-                        <Link href="/admin/reservations" className="p-4 bg-gray-50 rounded-2xl hover:bg-black hover:text-white transition-all text-center">
-                            <span className="block text-xl mb-1">🎫</span>
-                            <span className="font-bold text-sm">Tickets</span>
+                <div className="lg:col-span-2 space-y-8">
+                    <div className="bg-black p-10 rounded-[3rem] text-white flex flex-col justify-between h-full hover:scale-[1.02] transition-transform duration-500">
+                        <div>
+                            <h3 className="text-2xl font-black mb-4 italic tracking-widest uppercase">Go Pro</h3>
+                            <p className="text-gray-400 text-sm leading-relaxed mb-8">
+                                Prêt à passer au niveau supérieur ? Créez un nouvel événement dès maintenant.
+                            </p>
+                        </div>
+                        <Link href="/admin/events/create" className="w-full py-4 bg-white text-black rounded-2xl font-black text-center hover:bg-gray-200 transition-colors">
+                            Nvel Événement
                         </Link>
                     </div>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-3xl shadow-xl text-white">
-                    <header className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-bold">💡 Astuce Admin</h2>
-                        <span className="bg-white/10 px-2 py-1 rounded text-[10px] font-bold">PRO TIP</span>
-                    </header>
-                    <p className="text-gray-400 mb-6">Pensez à confirmer les réservations en attente pour valider vos revenus et libérer de la place pour de nouveaux participants.</p>
-                    <Link href="/admin/reservations" className="inline-block bg-white text-black px-6 py-2 rounded-xl font-bold hover:scale-105 transition-transform">
-                        Voir les attentes
-                    </Link>
-                </div>
-
-                <div className="bg-blue-600 p-8 rounded-3xl shadow-xl text-white flex flex-col justify-center">
-                    <h2 className="text-2xl font-black mb-2 italic">EVENTURA DASHBOARD</h2>
-                    <p className="opacity-80">Les données sont actualisées automatiquement toutes les 30 secondes pour vous garantir un suivi précis.</p>
                 </div>
             </div>
         </div>
