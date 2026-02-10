@@ -1,182 +1,118 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import api from '@/lib/api';
+import Link from 'next/link';
 
-interface Event {
-    id: string;
-    titre: string;
-    dateHeureDebut: string;
-    lieu: string;
-    capaciteMax: number;
-    statut: string;
-    imageAffiche?: string;
-    categorie: { nom: string };
-}
+const Icons = {
+    Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>,
+    Edit: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /></svg>,
+    Delete: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6" /></svg>,
+};
+
+interface Event { id: string; titre: string; dateHeureDebut: string; lieu: string; statut: string; categorie: { nom: string }; imageAffiche?: string; }
 
 export default function AdminEventsPage() {
     const [events, setEvents] = useState<Event[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
-
-    const fetchEvents = async () => {
-        try {
-            const res = await api.get('/events/admin');
-            setEvents(res.data);
-        } catch (err) {
-            console.error(err);
-            setError('Impossible de charger les événements.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchEvents();
+        loadEvents();
     }, []);
 
+    const loadEvents = () => {
+        api.get('/events/admin').then(res => { setEvents(res.data); setLoading(false); }).catch(() => setLoading(false));
+    };
+
     const handlePublish = async (id: string) => {
-        if (!confirm('Publier cet événement ?')) return;
+        try { await api.patch(`/events/${id}/publish`); loadEvents(); } catch (err) { alert('Erreur'); }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Voulez-vous définitivement supprimer cet événement ?')) return;
         try {
-            await api.patch(`/events/${id}/publish`);
-            fetchEvents();
-        } catch (err) {
-            alert('Erreur lors de la publication');
-        }
+            await api.delete(`/events/${id}`);
+            loadEvents();
+        } catch (err) { alert('Erreur lors de la suppression'); }
     };
 
-    const handleCancel = async (id: string) => {
-        if (!confirm('Annuler cet événement ?')) return;
-        try {
-            await api.patch(`/events/${id}/cancel`);
-            fetchEvents();
-        } catch (err) {
-            alert('Erreur lors de l\'annulation');
-        }
-    };
-
-    const getStatusStyles = (statut: string) => {
-        switch (statut) {
-            case 'BROUILLON':
-                return 'bg-gray-100 text-gray-500 border-gray-200';
-            case 'PUBLIE':
-                return 'bg-green-50 text-green-600 border-green-100';
-            case 'ANNULE':
-                return 'bg-red-50 text-red-500 border-red-100';
-            default:
-                return 'bg-gray-50 text-gray-400 border-gray-100';
-        }
-    };
-
-    if (isLoading) return (
-        <div className="flex justify-center items-center h-[60vh]">
-            <div className="w-8 h-8 border-2 border-gray-100 border-t-black rounded-full animate-spin"></div>
+    if (loading) return (
+        <div className="flex h-[40vh] items-center justify-center">
+            <div className="w-10 h-10 border-2 border-admin-border border-t-admin-accent rounded-full animate-spin"></div>
         </div>
     );
 
     return (
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
-                <div>
-                    <h1 className="text-4xl font-black text-black tracking-tighter mb-2">Événements</h1>
-                    <p className="text-gray-400 font-medium">Gérez votre catalogue d'expériences.</p>
+        <div className="space-y-12">
+            <div className="flex justify-between items-end">
+                <div className="space-y-1">
+                    <h1 className="text-6xl font-black text-admin-text-main tracking-tighter uppercase italic">Catalogue</h1>
+                    <p className="text-admin-text-dim font-bold text-xs uppercase tracking-[0.3em] px-1">Gestion des Inventaires événementiels</p>
                 </div>
                 <Link
                     href="/admin/events/create"
-                    className="bg-black text-white px-8 py-4 rounded-2xl font-black hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 flex items-center gap-3"
+                    className="flex items-center gap-4 bg-admin-accent text-admin-bg px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:brightness-110 shadow-2xl transition-all active:scale-95"
                 >
-                    <span className="text-xl">+</span>
-                    Nvel Événement
+                    <Icons.Plus /> Nouveau Slot
                 </Link>
             </div>
 
-            {error ? (
-                <div className="p-8 bg-red-50 text-red-500 rounded-3xl border border-red-100 font-bold">{error}</div>
-            ) : (
-                <div className="bg-white rounded-[2.5rem] border border-[#F0F0F3] overflow-hidden shadow-sm">
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-[#F0F0F3]">
-                            <thead>
-                                <tr className="bg-gray-50/50">
-                                    <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Événement</th>
-                                    <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Détails</th>
-                                    <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Statut</th>
-                                    <th className="px-8 py-6 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Actions</th>
+            <div className="bg-admin-card rounded-[3.5rem] border border-admin-border overflow-hidden shadow-2xl">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-admin-inner/50 border-b border-admin-border text-admin-text-dim text-[10px] uppercase font-black tracking-[0.4em]">
+                                <th className="px-12 py-8">Référence Unit</th>
+                                <th className="px-12 py-8">Logistique</th>
+                                <th className="px-12 py-8">Statut Flux</th>
+                                <th className="px-12 py-8 text-right">Contrôle</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-admin-border/50">
+                            {events.map((e) => (
+                                <tr key={e.id} className="hover:bg-admin-inner/30 transition-all group">
+                                    <td className="px-12 py-10">
+                                        <div className="flex items-center gap-8">
+                                            <div className="w-16 h-16 bg-admin-inner rounded-2xl border border-admin-border overflow-hidden shrink-0 shadow-inner group-hover:border-admin-accent/50 transition-all">
+                                                {e.imageAffiche && <img src={e.imageAffiche} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />}
+                                            </div>
+                                            <div>
+                                                <div className="text-xl font-black tracking-tighter text-admin-text-main uppercase italic group-hover:text-admin-accent transition-colors">{e.titre}</div>
+                                                <div className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.2em] mt-1">{e.categorie?.nom}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-12 py-10">
+                                        <div className="text-sm font-black text-admin-text-muted italic">{new Date(e.dateHeureDebut).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                                        <div className="text-[10px] font-bold text-admin-text-dim uppercase tracking-widest mt-1">{e.lieu}</div>
+                                    </td>
+                                    <td className="px-12 py-10">
+                                        <span className={`px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border ${e.statut === 'PUBLIE'
+                                            ? 'bg-status-success/5 text-status-success border-status-success/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+                                            : 'bg-admin-inner text-admin-text-dim border-admin-border'
+                                            }`}>
+                                            {e.statut}
+                                        </span>
+                                    </td>
+                                    <td className="px-12 py-10 text-right">
+                                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                                            {e.statut === 'BROUILLON' && (
+                                                <button onClick={() => handlePublish(e.id)} className="bg-admin-accent text-admin-bg px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:brightness-110 shadow-lg shadow-admin-accent/20 transition-all">Activer</button>
+                                            )}
+                                            <Link href={`/admin/events/${e.id}/edit`} className="w-10 h-10 bg-admin-inner border border-admin-border flex items-center justify-center rounded-xl text-admin-text-dim hover:text-admin-accent hover:border-admin-accent/30 transition-all">
+                                                <Icons.Edit />
+                                            </Link>
+                                            <button onClick={() => handleDelete(e.id)} className="w-10 h-10 bg-admin-inner border border-admin-border flex items-center justify-center rounded-xl text-admin-text-dim hover:text-status-error hover:border-status-error/30 transition-all">
+                                                <Icons.Delete />
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[#F0F0F3]">
-                                {events.map((event) => (
-                                    <tr key={event.id} className="hover:bg-[#FBFBFE] transition-colors group">
-                                        <td className="px-8 py-6 whitespace-nowrap">
-                                            <div className="flex items-center gap-4">
-                                                <div className="h-16 w-16 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 border border-[#F0F0F3]">
-                                                    {event.imageAffiche ? (
-                                                        <img src={event.imageAffiche} alt={event.titre} className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                                    ) : (
-                                                        <div className="h-full w-full flex items-center justify-center text-gray-300 font-black">?</div>
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <div className="text-sm font-black text-black">{event.titre}</div>
-                                                    <div className="text-[10px] font-bold text-gray-400 uppercase mt-1 px-2 py-0.5 rounded bg-gray-50 inline-block">
-                                                        {event.categorie?.nom}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6 whitespace-nowrap">
-                                            <div className="text-sm font-bold text-gray-700">📅 {new Date(event.dateHeureDebut).toLocaleDateString()}</div>
-                                            <div className="text-xs text-gray-400 mt-1">📍 {event.lieu}</div>
-                                        </td>
-                                        <td className="px-8 py-6 whitespace-nowrap">
-                                            <span className={`px-3 py-1.5 rounded-full text-[10px] font-black border ${getStatusStyles(event.statut)}`}>
-                                                {event.statut}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-6 whitespace-nowrap text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                {event.statut === 'BROUILLON' && (
-                                                    <button
-                                                        onClick={() => handlePublish(event.id)}
-                                                        className="p-2.5 rounded-xl bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition-all"
-                                                        title="Publier"
-                                                    >
-                                                        🚀
-                                                    </button>
-                                                )}
-                                                {event.statut === 'PUBLIE' && (
-                                                    <button
-                                                        onClick={() => handleCancel(event.id)}
-                                                        className="p-2.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                                                        title="Annuler"
-                                                    >
-                                                        🚫
-                                                    </button>
-                                                )}
-                                                <Link
-                                                    href={`/admin/events/${event.id}/edit`}
-                                                    className="p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:bg-black hover:text-white transition-all"
-                                                    title="Modifier"
-                                                >
-                                                    ✏️
-                                                </Link>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {events.length === 0 && (
-                                    <tr>
-                                        <td colSpan={4} className="px-8 py-20 text-center">
-                                            <p className="text-gray-400 font-medium">Aucun événement pour le moment.</p>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-            )}
+            </div>
         </div>
     );
 }

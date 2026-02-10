@@ -8,101 +8,93 @@ import api from '@/lib/api';
 
 export default function LoginPage() {
     const router = useRouter();
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
+    const [formData, setFormData] = useState({ email: '', password: '' });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
 
     const validate = () => {
         const newErrors: Record<string, string> = {};
-
-        if (!formData.email) newErrors.email = 'Email requis';
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email invalide';
-
-        if (!formData.password) newErrors.password = 'Mot de passe requis';
-
+        if (!formData.email) newErrors.email = 'Requis';
+        if (!formData.password) newErrors.password = 'Requis';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!validate()) return;
-
         setLoading(true);
         try {
             const response = await api.post('/auth/login', formData);
             const { access_token, user } = response.data;
-
-            // Stocker le token et l'utilisateur
             authService.setToken(access_token);
             authService.setUser(user);
-
-            // Redirection intelligente selon le rôle
-            if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
-                router.push('/admin/events');
-            } else {
-                router.push('/');
-            }
+            if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') router.push('/admin');
+            else router.push('/');
         } catch (error: any) {
             setErrors({ submit: error.response?.data?.message || 'Identifiants invalides' });
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
-                <h1 className="text-2xl font-bold mb-6 text-center">Connexion</h1>
+        <div className="min-h-screen flex items-center justify-center bg-admin-bg p-8">
+            <div className="max-w-md w-full bg-admin-card p-16 rounded-[4rem] border border-admin-border shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-admin-accent opacity-[0.03] blur-[60px] -mr-32 -mt-32"></div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Email</label>
+                <div className="text-center mb-16">
+                    <div className="w-20 h-20 bg-admin-accent rounded-[2rem] flex items-center justify-center text-admin-bg font-black text-3xl mx-auto mb-8 shadow-2xl shadow-admin-accent/30 rotate-3 group-hover:rotate-0 transition-transform duration-500">E</div>
+                    <h1 className="text-5xl font-black text-admin-text-main tracking-tighter uppercase italic leading-none">Connexion</h1>
+                    <p className="text-admin-text-dim text-[10px] uppercase font-black tracking-[0.4em] mt-4 italic opacity-50">Protocole Console Authentification</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-8">
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.4em] px-4 italic">Identifiant Email</label>
                         <input
                             type="email"
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="votre@email.com"
+                            className="w-full bg-admin-inner border border-admin-border rounded-2xl py-6 px-8 text-sm font-black text-admin-text-main focus:border-admin-accent/50 transition-all outline-none shadow-inner placeholder:opacity-10"
+                            placeholder="admin@eventura.net"
                         />
-                        {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                        {errors.email && <p className="text-status-error text-[10px] font-black uppercase mt-3 px-4 tracking-widest italic">{errors.email}</p>}
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Mot de passe</label>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.4em] px-4 italic">Code d'accès</label>
                         <input
                             type="password"
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-admin-inner border border-admin-border rounded-2xl py-6 px-8 text-sm font-black text-admin-text-main focus:border-admin-accent/50 transition-all outline-none shadow-inner placeholder:opacity-10"
                             placeholder="••••••••"
                         />
-                        {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                        {errors.password && <p className="text-status-error text-[10px] font-black uppercase mt-3 px-4 tracking-widest italic">{errors.password}</p>}
                     </div>
 
                     {errors.submit && (
-                        <p className="text-red-500 text-sm text-center">{errors.submit}</p>
+                        <div className="p-5 bg-status-error/5 border border-status-error/10 rounded-2xl">
+                            <p className="text-status-error text-[10px] font-black uppercase text-center tracking-widest italic">{errors.submit}</p>
+                        </div>
                     )}
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+                        className="w-full bg-admin-accent text-admin-bg py-6 rounded-2xl font-black text-xs uppercase tracking-[0.4em] hover:brightness-110 shadow-2xl shadow-admin-accent/20 transition-all disabled:opacity-50 mt-4 active:scale-95"
                     >
-                        {loading ? 'Connexion...' : 'Se connecter'}
+                        {loading ? 'AUTHENTIFICATION...' : 'S\'IDENTIFIER'}
                     </button>
                 </form>
 
-                <p className="mt-4 text-center text-sm text-gray-600">
-                    Pas encore de compte ?{' '}
-                    <Link href="/register" className="text-blue-600 hover:underline">
-                        S'inscrire
-                    </Link>
-                </p>
+                <div className="mt-16 pt-10 border-t border-admin-border text-center">
+                    <p className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.3em]">
+                        Nouveau prototype ?{' '}
+                        <Link href="/register" className="text-admin-accent hover:underline decoration-2 underline-offset-8 transition-all">
+                            S'INSCRIRE
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
     );

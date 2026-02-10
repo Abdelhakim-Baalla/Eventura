@@ -248,5 +248,13 @@ export class EventsService {
     }
     return { message: 'Categories seeded' };
   }
+
+  async remove(id: string): Promise<void> {
+    const event = await this.eventRepository.findOne({ where: { id } });
+    if (!event) {
+      throw new NotFoundException('Événement introuvable');
+    }
+    await this.eventRepository.remove(event);
+  }
 }
 
