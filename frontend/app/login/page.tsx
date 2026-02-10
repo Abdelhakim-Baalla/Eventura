@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/lib/auth';
+import api from '@/lib/api';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -33,28 +34,21 @@ export default function LoginPage() {
 
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                setErrors({ submit: error.message || 'Identifiants invalides' });
-                return;
-            }
-
-            const data = await response.json();
+            const response = await api.post('/auth/login', formData);
+            const { access_token, user } = response.data;
 
             // Stocker le token et l'utilisateur
-            authService.setToken(data.access_token);
-            authService.setUser(data.user);
+            authService.setToken(access_token);
+            authService.setUser(user);
 
-            // Redirection vers le dashboard
-            router.push('/dashboard');
-        } catch (error) {
-            setErrors({ submit: 'Erreur de connexion au serveur' });
+            // Redirection intelligente selon le rôle
+            if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+                router.push('/admin/events');
+            } else {
+                router.push('/');
+            }
+        } catch (error: any) {
+            setErrors({ submit: error.response?.data?.message || 'Identifiants invalides' });
         } finally {
             setLoading(false);
         }
