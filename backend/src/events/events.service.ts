@@ -119,4 +119,64 @@ export class EventsService {
   async findAllCategories(): Promise<Category[]> {
     return await this.categoryRepository.find();
   }
+
+  async publish(id: string): Promise<Event> {
+    const event = await this.eventRepository.findOne({ where: { id } });
+    if (!event) {
+      throw new NotFoundException('Événement introuvable');
+    }
+
+    if (event.statut !== StatutEvenement.BROUILLON) {
+      throw new BadRequestException('Seul un brouillon peut être publié');
+    }
+
+    event.statut = StatutEvenement.PUBLIE;
+    return await this.eventRepository.save(event);
+  }
+
+  async cancel(id: string): Promise<Event> {
+    const event = await this.eventRepository.findOne({ where: { id } });
+    if (!event) {
+      throw new NotFoundException('Événement introuvable');
+    }
+
+    if (event.statut !== StatutEvenement.PUBLIE) {
+      throw new BadRequestException('Seul un événement publié peut être annulé');
+    }
+
+    event.statut = StatutEvenement.ANNULE;
+    return await this.eventRepository.save(event);
+  }
+
+  async findAllForAdmin(): Promise<Event[]> {
+    return await this.eventRepository.find({
+      order: { dateCreation: 'DESC' },
+      relations: ['categorie'],
+    });
+  }
+
+  async findOne(id: string): Promise<Event> {
+    const event = await this.eventRepository.findOne({
+      where: { id },
+      relations: ['categorie'],
+    });
+    if (!event) {
+      throw new NotFoundException('Événement introuvable');
+    }
+    return event;
+  }
+
+  async seedCategories() {
+    const categories = ['Concert', 'Conférence', 'Atelier', 'Sport', 'Théâtre'];
+    for (const nom of categories) {
+      const existing = await this.categoryRepository.findOne({ where: { nom } });
+      if (!existing) {
+        await this.categoryRepository.save(
+          this.categoryRepository.create({ nom }),
+        );
+      }
+    }
+    return { message: 'Categories seeded' };
+  }
 }
+
