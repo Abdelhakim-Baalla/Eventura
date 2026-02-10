@@ -52,7 +52,7 @@ export class ReservationsService {
         const reservation = this.reservationRepository.create({
             evenementId,
             utilisateurId,
-            statut: StatutReservation.CONFIRME,
+            statut: StatutReservation.EN_ATTENTE,
             referenceTicket,
         });
 
@@ -65,5 +65,48 @@ export class ReservationsService {
             relations: ['evenement'],
             order: { dateReservation: 'DESC' }
         });
+    }
+
+    async findAllForAdmin(adminId: string) {
+        const reservations = await this.reservationRepository.find({
+            relations: ['evenement', 'utilisateur'],
+            order: { dateReservation: 'DESC' }
+        });
+
+        return reservations.filter(res => res.evenement?.createurId === adminId);
+    }
+
+    async updateStatus(id: string, statut: StatutReservation, adminId: string) {
+        const reservation = await this.reservationRepository.findOne({
+            where: { id },
+            relations: ['evenement']
+        });
+
+        if (!reservation) {
+            throw new NotFoundException('Réservation introuvable');
+        }
+
+        // Vérification que l'admin est bien le créateur de l'événement
+        if (reservation.evenement.createurId !== adminId) {
+            throw new BadRequestException('Vous n\'avez pas les droits sur cette réservation');
+        }
+
+        // Si on confirme, on vérifie la capacité
+        if (statut === StatutReservation.CONFIRME && reservation.statut !== StatutReservation.CONFIRME) {
+            const confirmedCount = await this.reservationRepository.count({
+                where: { evenementId: reservation.evenementId, statut: StatutReservation.CONFIRME }
+            });
+
+            if (confirmedCount >= reservation.evenement.capaciteMax) {
+                throw new BadRequestException('Impossible de confirmer : l\'événement est complet');
+            }
+        }
+
+        reservation.statut = statut;
+        if (statut === StatutReservation.CONFIRME) {
+            reservation.dateConfirmation = new Date();
+        }
+
+        return await this.reservationRepository.save(reservation);
     }
 }

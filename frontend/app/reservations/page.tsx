@@ -7,6 +7,7 @@ import Link from 'next/link';
 interface Reservation {
     id: string;
     referenceTicket: string;
+    statut: string;
     dateReservation: string;
     evenement: {
         id: string;
@@ -64,7 +65,13 @@ export default function MyReservationsPage() {
                                 <div className="p-6 flex-1">
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 className="text-lg font-bold text-blue-600">{res.evenement.titre}</h3>
-                                        <span className="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded-full uppercase">Confirmé</span>
+                                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase ${res.statut === 'CONFIRME' ? 'bg-green-100 text-green-800' :
+                                            res.statut === 'REFUSE' ? 'bg-red-100 text-red-800' :
+                                                res.statut === 'ANNULE' ? 'bg-gray-100 text-gray-800' :
+                                                    'bg-yellow-100 text-yellow-800'
+                                            }`}>
+                                            {res.statut}
+                                        </span>
                                     </div>
                                     <div className="text-sm text-gray-600 space-y-1 mb-4">
                                         <p>📅 {new Date(res.evenement.dateHeureDebut).toLocaleString()}</p>

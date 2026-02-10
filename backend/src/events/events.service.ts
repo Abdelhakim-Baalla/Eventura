@@ -10,6 +10,7 @@ import { Category } from '../users/entities/category.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { StatutEvenement } from '../common/enums/statut-evenement.enum';
 import { StatutReservation } from '../common/enums/statut-reservation.enum';
+import { Reservation } from '../users/entities/reservation.entity';
 
 @Injectable()
 export class EventsService {
@@ -18,7 +19,38 @@ export class EventsService {
     private eventRepository: Repository<Event>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    @InjectRepository(Reservation)
+    private reservationRepository: Repository<Reservation>,
   ) { }
+
+  async getStats(adminId: string) {
+    const events = await this.eventRepository.find({
+      where: { createurId: adminId },
+      relations: ['reservations']
+    });
+
+    const totalEvents = events.length;
+    let totalReservations = 0;
+    let totalRevenue = 0;
+    let totalConfirmed = 0;
+
+    events.forEach(event => {
+      totalReservations += event.reservations.length;
+      event.reservations.forEach(res => {
+        if (res.statut === StatutReservation.CONFIRME) {
+          totalConfirmed++;
+          totalRevenue += Number(event.prix);
+        }
+      });
+    });
+
+    return {
+      totalEvents,
+      totalReservations,
+      totalConfirmed,
+      totalRevenue
+    };
+  }
 
   async create(
     createEventDto: CreateEventDto,

@@ -24,6 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const links = [
         { href: '/admin', label: 'Dashboard' },
         { href: '/admin/events', label: 'Événements' },
+        { href: '/admin/reservations', label: 'Réservations' },
         { href: '/admin/categories', label: 'Catégories' },
     ];
 
