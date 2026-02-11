@@ -77,8 +77,16 @@ export default function EditEventPage() {
             </header>
 
             {error && (
-                <div className="bg-status-error/10 border border-status-error/30 rounded-2xl p-6 text-status-error font-bold text-sm">
-                    ⚠️ {error}
+                <div className="bg-red-500/10 border-2 border-red-500/50 rounded-2xl p-6 flex items-center gap-4">
+                    <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p className="text-red-400 font-black text-sm uppercase tracking-wider">Erreur</p>
+                        <p className="text-red-300 font-medium text-sm mt-1">{error}</p>
+                    </div>
                 </div>
             )}
 
