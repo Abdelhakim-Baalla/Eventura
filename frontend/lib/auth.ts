@@ -1,7 +1,24 @@
+import api from './api';
+
 const TOKEN_KEY = 'eventura_token';
 const USER_KEY = 'eventura_user';
 
 export const authService = {
+    // Connexion
+    async login(email: string, password: string): Promise<any> {
+        const response = await api.post('/auth/login', { email, password });
+        const { access_token, user } = response.data;
+        this.setToken(access_token);
+        this.setUser(user);
+        return response.data;
+    },
+
+    // Inscription
+    async register(userData: any): Promise<any> {
+        const response = await api.post('/auth/register', userData);
+        return response.data;
+    },
+
     // Stocker le token
     setToken(token: string): void {
         if (typeof window !== 'undefined') {

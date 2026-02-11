@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { authService } from '@/lib/auth';
 import Link from 'next/link';
 
 export default function RegisterPage() {
@@ -24,19 +25,10 @@ export default function RegisterPage() {
         if (!validate()) return;
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
-            if (!response.ok) {
-                const error = await response.json();
-                setErrors({ submit: error.message || 'Échec de l\'inscription' });
-                return;
-            }
+            await authService.register(formData);
             router.push('/login');
-        } catch (error) {
-            setErrors({ submit: 'Erreur réseau' });
+        } catch (err: any) {
+            setErrors({ submit: err.response?.data?.message || 'Échec de l\'inscription' });
         } finally {
             setLoading(false);
         }
