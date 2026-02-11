@@ -1,20 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { authService } from '@/lib/auth';
+import Image from 'next/image';
+import { authService, User } from '@/lib/auth';
 import { usePathname, useRouter } from 'next/navigation';
-
-interface User {
-    id: string;
-    email: string;
-    nom: string;
-    prenom: string;
-    role: 'SUPER_ADMIN' | 'ADMIN' | 'PARTICIPANT';
-    telephone?: string;
-    estActif: boolean;
-    dateCreation: string;
-}
 
 const Icons = {
     Dashboard: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" /></svg>,
@@ -29,8 +19,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [mounted, setMounted] = useState(false);
+    const initializedRef = useRef(false);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+        if (initializedRef.current) return;
+        initializedRef.current = true;
+
         const currentUser = authService.getUser();
         setUser(currentUser);
         setMounted(true);
@@ -60,7 +54,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                 <div className="h-20 px-8 border-b border-admin-border flex items-center gap-3 relative z-10">
                     <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                        <img src="/admin-logo.png" alt="Eventura" className="w-9 h-9 rounded-xl border border-admin-border shadow-lg" />
+                        <Image src="/admin-logo.png" alt="Eventura" width={36} height={36} className="rounded-xl border border-admin-border shadow-lg" />
                         <span className="text-sm font-black tracking-tight leading-none uppercase italic">EVENTURA_CONSOLE</span>
                     </Link>
                 </div>

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/api';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const Icons = {
     Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>,
@@ -16,16 +17,16 @@ export default function AdminEventsPage() {
     const [events, setEvents] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadEvents();
+    const loadEvents = useCallback(() => {
+        api.get('/events/admin').then(res => { setEvents(res.data); setLoading(false); }).catch(() => setLoading(false));
     }, []);
 
-    const loadEvents = () => {
-        api.get('/events/admin').then(res => { setEvents(res.data); setLoading(false); }).catch(() => setLoading(false));
-    };
+    useEffect(() => {
+        loadEvents();
+    }, [loadEvents]);
 
     const handlePublish = async (id: string) => {
-        try { await api.patch(`/events/${id}/publish`); loadEvents(); } catch (err) { alert('Erreur'); }
+        try { await api.patch(`/events/${id}/publish`); loadEvents(); } catch { alert('Erreur'); }
     };
 
     const handleDelete = async (id: string) => {
@@ -33,7 +34,7 @@ export default function AdminEventsPage() {
         try {
             await api.delete(`/events/${id}`);
             loadEvents();
-        } catch (err) { alert('Erreur lors de la suppression'); }
+        } catch { alert('Erreur lors de la suppression'); }
     };
 
     if (loading) return (
@@ -73,8 +74,8 @@ export default function AdminEventsPage() {
                                 <tr key={e.id} className="hover:bg-admin-inner/30 transition-all group">
                                     <td className="px-12 py-10">
                                         <div className="flex items-center gap-8">
-                                            <div className="w-16 h-16 bg-admin-inner rounded-2xl border border-admin-border overflow-hidden shrink-0 shadow-inner group-hover:border-admin-accent/50 transition-all">
-                                                {e.imageAffiche && <img src={e.imageAffiche} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />}
+                                            <div className="w-16 h-16 bg-admin-inner rounded-2xl border border-admin-border overflow-hidden shrink-0 shadow-inner group-hover:border-admin-accent/50 transition-all relative">
+                                                {e.imageAffiche && <Image src={e.imageAffiche} alt="" fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700" unoptimized />}
                                             </div>
                                             <div>
                                                 <div className="text-xl font-black tracking-tighter text-admin-text-main uppercase italic group-hover:text-admin-accent transition-colors">{e.titre}</div>

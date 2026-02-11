@@ -1,23 +1,39 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { authService } from '@/lib/auth';
+import { authService, User } from '@/lib/auth';
+import Image from 'next/image';
 
 interface Event { id: string; titre: string; description: string; dateHeureDebut: string; lieu: string; prix: number; categorie: { nom: string }; imageAffiche?: string; }
+
+// NavLink component défini en dehors du composant principal
+function NavLink({ href, children, pathname }: { href: string; children: React.ReactNode; pathname: string }) {
+  const isActive = pathname === href;
+  return (
+    <Link href={href} className={`text-[11px] font-black uppercase tracking-widest transition-all ${isActive ? 'text-site-accent border-b-2 border-site-accent pb-1' : 'text-site-text-muted hover:text-white'}`}>
+      {children}
+    </Link>
+  );
+}
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    setUser(authService.getUser());
-    api.get('/events').then(res => setEvents(res.data)).catch(err => console.error(err)).finally(() => setLoading(false));
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    const currentUser = authService.getUser();
+    setUser(currentUser);
+    api.get('/events').then(res => setEvents(res.data)).finally(() => setLoading(false));
   }, []);
 
   const handleLogout = () => { authService.logout(); setUser(null); window.location.reload(); };
@@ -27,15 +43,6 @@ export default function Home() {
     e.lieu.toLowerCase().includes(searchTerm.toLowerCase()) ||
     e.categorie?.nom.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
-    const isActive = pathname === href;
-    return (
-      <Link href={href} className={`text-[11px] font-black uppercase tracking-widest transition-all ${isActive ? 'text-site-accent border-b-2 border-site-accent pb-1' : 'text-site-text-muted hover:text-white'}`}>
-        {children}
-      </Link>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-site-bg text-site-text-main font-sans selection:bg-site-accent selection:text-white">
@@ -48,9 +55,9 @@ export default function Home() {
           </Link>
 
           <div className="hidden md:flex items-center gap-10">
-            <NavLink href="/">Accueil</NavLink>
-            <NavLink href="/explore">Explorer</NavLink>
-            {user && <NavLink href="/reservations">Mes Tickets</NavLink>}
+            <NavLink href="/" pathname={pathname}>Accueil</NavLink>
+            <NavLink href="/explore" pathname={pathname}>Explorer</NavLink>
+            {user && <NavLink href="/reservations" pathname={pathname}>Mes Tickets</NavLink>}
           </div>
 
           <div className="flex items-center gap-6">
@@ -64,7 +71,7 @@ export default function Home() {
             ) : (
               <div className="flex items-center gap-4">
                 <Link href="/login" className="text-[10px] font-black uppercase tracking-widest text-site-text-muted hover:text-white">Connexion</Link>
-                <Link href="/register" className="bg-site-accent text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-site-accent/20">S'inscrire</Link>
+                <Link href="/register" className="bg-site-accent text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-site-accent/20">S&apos;inscrire</Link>
               </div>
             )}
           </div>
@@ -84,7 +91,7 @@ export default function Home() {
               Rejoignez les meilleures <br /><span className="text-site-accent underline decoration-site-accent/30 decoration-8 underline-offset-8">sessions du réseau.</span>
             </h1>
             <p className="text-lg text-site-text-muted font-medium max-w-lg leading-relaxed">
-              Explorez une architecture d'événements unique et sécurisée. Gérez vos accès en temps réel avec notre protocole de réservation.
+              Explorez une architecture d&apos;événements unique et sécurisée. Gérez vos accès en temps réel avec notre protocole de réservation.
             </p>
             <div className="relative group max-w-md">
               <input
@@ -97,7 +104,6 @@ export default function Home() {
               <svg className="absolute left-5 top-1/2 -translate-y-1/2 text-site-text-muted group-focus-within:text-site-accent transition-colors" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
             </div>
           </div>
-
         </div>
       </header>
 
@@ -122,7 +128,7 @@ export default function Home() {
                 className="group flex flex-col bg-site-card border border-site-border rounded-[2.5rem] overflow-hidden hover:border-site-accent/50 transition-all shadow-xl hover:-translate-y-2">
                 <div className="h-64 bg-site-inner relative overflow-hidden">
                   {e.imageAffiche ? (
-                    <img src={e.imageAffiche} alt={e.titre} className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:scale-110 group-hover:opacity-100 transition-all duration-[1s]" />
+                    <Image src={e.imageAffiche} alt={e.titre} fill className="object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:scale-110 group-hover:opacity-100 transition-all duration-[1s]" unoptimized />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-site-text-dim text-[10px] font-black uppercase tracking-widest opacity-20">NO_DATA_VISUAL</div>
                   )}

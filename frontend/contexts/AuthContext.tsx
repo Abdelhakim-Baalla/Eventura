@@ -22,19 +22,18 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    // Au chargement, récupérer l'utilisateur depuis localStorage
-    useEffect(() => {
+    // Initialiser l'user depuis localStorage immédiatement
+    const initialUser = (() => {
         const storedUser = authService.getUser();
         const token = authService.getToken();
+        return (storedUser && token) ? storedUser : null;
+    })();
 
-        if (storedUser && token) {
-            setUser(storedUser);
-        }
+    const [user, setUser] = useState<User | null>(initialUser);
+    const [isLoading] = useState(false);
 
-        setIsLoading(false);
+    useEffect(() => {
+        // Le chargement est déjà fait
     }, []);
 
     const login = (token: string, userData: User) => {

@@ -1,26 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
 import Link from 'next/link';
 
 interface Reservation { id: string; referenceTicket: string; statut: string; dateReservation: string; utilisateur: { nom: string; email: string; }; evenement: { id: string; titre: string; dateHeureDebut: string; lieu: string; }; }
 
+interface ReservationResponse {
+    items: Reservation[];
+}
+
 export default function MyReservationsPage() {
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('ALL');
+    const initializedRef = useRef(false);
 
     useEffect(() => {
-        setLoading(true);
-        const params: any = {};
+        const params: Record<string, string> = {};
         if (filter !== 'ALL') params.statut = filter;
-        api.get('/reservations/my', { params }).then(res => setReservations(res.data.items || [])).catch(err => console.error(err)).finally(() => setLoading(false));
+        setLoading(true);
+        api.get<ReservationResponse>('/reservations/my', { params }).then(res => setReservations(res.data.items || [])).finally(() => setLoading(false));
     }, [filter]);
 
     const handleCancel = async (id: string) => {
         if (!confirm('Voulez-vous annuler l\'accès ?')) return;
-        try { await api.patch(`/reservations/${id}/cancel`); setFilter('ALL'); } catch (err) { alert('Erreur'); }
+        try { await api.patch(`/reservations/${id}/cancel`); setFilter('ALL'); } catch { alert('Erreur'); }
     };
 
     return (

@@ -21,8 +21,9 @@ export default function LoginPage() {
             const user = authService.getUser();
             if (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') router.push('/admin');
             else router.push('/');
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Identifiants invalides');
+        } catch (err: unknown) {
+            const axiosError = err as { response?: { data?: { message?: string } } };
+            setError(axiosError.response?.data?.message || 'Identifiants invalides');
         } finally {
             setLoading(false);
         }
@@ -53,7 +54,7 @@ export default function LoginPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-site-text-muted uppercase tracking-widest px-2 opacity-60">Code d'accès</label>
+                        <label className="text-[10px] font-black text-site-text-muted uppercase tracking-widest px-2 opacity-60">Code d&apos;accès</label>
                         <input
                             type="password"
                             value={password}
