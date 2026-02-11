@@ -17,8 +17,8 @@ function NavLink({ href, children, pathname }: { href: string; children: React.R
       {children}
     </Link>
   );
-import { useState, useEffect } from 'react';
-// ... existing code ...
+}
+
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
