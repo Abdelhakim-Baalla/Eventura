@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import Link from 'next/link';
 
@@ -14,13 +14,19 @@ export default function MyReservationsPage() {
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('ALL');
-    const initializedRef = useRef(false);
 
     useEffect(() => {
-        const params: Record<string, string> = {};
-        if (filter !== 'ALL') params.statut = filter;
-        setLoading(true);
-        api.get<ReservationResponse>('/reservations/my', { params }).then(res => setReservations(res.data.items || [])).finally(() => setLoading(false));
+        const fetchReservations = async () => {
+            const params: Record<string, string> = {};
+            if (filter !== 'ALL') params.statut = filter;
+            try {
+                const res = await api.get<ReservationResponse>('/reservations/my', { params });
+                setReservations(res.data.items || []);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchReservations();
     }, [filter]);
 
     const handleCancel = async (id: string) => {

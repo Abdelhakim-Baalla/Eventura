@@ -23,16 +23,10 @@ export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => authService.getUser());
   const pathname = usePathname();
-  const initializedRef = useRef(false);
 
   useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
-
-    const currentUser = authService.getUser();
-    setUser(currentUser);
     api.get('/events').then(res => setEvents(res.data)).finally(() => setLoading(false));
   }, []);
 
