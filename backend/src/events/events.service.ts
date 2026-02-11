@@ -77,6 +77,7 @@ export class EventsService {
       dateHeureFin,
       lieu,
       capaciteMax,
+      prix,
       imageAffiche,
       categorieId,
     } = createEventDto;
@@ -106,6 +107,7 @@ export class EventsService {
       dateHeureFin: fin,
       lieu,
       capaciteMax,
+      prix,
       imageAffiche,
       categorieId,
       createurId,
