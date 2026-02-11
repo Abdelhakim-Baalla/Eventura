@@ -3,6 +3,17 @@ import api from './api';
 const TOKEN_KEY = 'eventura_token';
 const USER_KEY = 'eventura_user';
 
+export interface User {
+    id: string;
+    email: string;
+    nom: string;
+    prenom: string;
+    role: 'SUPER_ADMIN' | 'ADMIN' | 'PARTICIPANT';
+    telephone?: string;
+    estActif: boolean;
+    dateCreation: string;
+}
+
 export const authService = {
     // Connexion
     async login(email: string, password: string): Promise<any> {

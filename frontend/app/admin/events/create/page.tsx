@@ -8,38 +8,74 @@ import api from '@/lib/api';
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 import 'react-quill-new/dist/quill.snow.css';
 
-const Icons = {
-    Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-};
+interface Category {
+    id: string;
+    nom: string;
+    description?: string;
+}
 
 export default function CreateEventPage() {
     const router = useRouter();
     const [formData, setFormData] = useState({ titre: '', description: '', dateHeureDebut: '', dateHeureFin: '', lieu: '', capaciteMax: 1, prix: 0, imageAffiche: '', categorieId: '', });
     const [isLoading, setIsLoading] = useState(false);
-    const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => { api.get('/events/categories').then(res => setCategories(res.data)); }, []);
 
-    const handleChange = (e: any) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+        setError(null); // Effacer l'erreur quand l'utilisateur modifie le formulaire
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
+
+        // Validation côté client : vérifier que la date de fin est après la date de début
+        const dateDebut = new Date(formData.dateHeureDebut);
+        const dateFin = new Date(formData.dateHeureFin);
+
+        if (dateFin <= dateDebut) {
+            setError('La date de fin doit être après la date de début');
+            return;
+        }
+
+        if (!formData.categorieId) {
+            setError('Veuillez sélectionner une catégorie');
+            return;
+        }
+
         setIsLoading(true);
         try {
             await api.post('/events', { ...formData, capaciteMax: Number(formData.capaciteMax), prix: Number(formData.prix), });
             router.push('/admin/events');
-        } catch (err) { alert('Erreur lors de la création'); } finally { setIsLoading(false); }
+        } catch (err: unknown) {
+            const axiosError = err as { response?: { data?: { message?: string | string[] } } };
+            const message = axiosError.response?.data?.message;
+            if (Array.isArray(message)) {
+                setError(message.join(', '));
+            } else if (typeof message === 'string') {
+                setError(message);
+            } else {
+                setError('Erreur lors de la création de l\'événement');
+            }
+        } finally { setIsLoading(false); }
     };
 
     return (
         <div className="space-y-12 pb-40">
             <header className="space-y-1">
                 <h1 className="text-5xl font-black text-admin-text-main tracking-tighter uppercase italic">Création</h1>
-                <p className="text-admin-text-dim font-bold text-[10px] uppercase tracking-[0.4em] px-1">Injection d'une nouvelle unité analytique</p>
+                <p className="text-admin-text-dim font-bold text-[10px] uppercase tracking-[0.4em] px-1">Injection d&apos;une nouvelle unité analytique</p>
             </header>
+
+            {error && (
+                <div className="bg-status-error/10 border border-status-error/30 rounded-2xl p-6 text-status-error font-bold text-sm">
+                    ⚠️ {error}
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <div className="lg:col-span-2 space-y-10">
@@ -78,11 +114,22 @@ export default function CreateEventPage() {
                         <h3 className="text-[9px] font-black uppercase tracking-[0.3em] opacity-60">Paramètres de Protocol</h3>
                         <div className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[8px] font-black uppercase tracking-widest opacity-40 px-2 underline decoration-2 underline-offset-4">Temporalité</label>
+                                <label className="text-[8px] font-black uppercase tracking-widest opacity-40 px-2 underline decoration-2 underline-offset-4">Date de Début</label>
                                 <input
                                     type="datetime-local"
                                     name="dateHeureDebut"
                                     value={formData.dateHeureDebut}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full bg-admin-bg/10 border border-white/10 rounded-xl py-4 px-5 text-sm font-black outline-none font-sans text-admin-bg"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[8px] font-black uppercase tracking-widest opacity-40 px-2 underline decoration-2 underline-offset-4">Date de Fin</label>
+                                <input
+                                    type="datetime-local"
+                                    name="dateHeureFin"
+                                    value={formData.dateHeureFin}
                                     onChange={handleChange}
                                     required
                                     className="w-full bg-admin-bg/10 border border-white/10 rounded-xl py-4 px-5 text-sm font-black outline-none font-sans text-admin-bg"
@@ -98,6 +145,18 @@ export default function CreateEventPage() {
                                     required
                                     placeholder="Lieu de l'événement"
                                     className="w-full bg-admin-bg/10 border border-white/10 rounded-xl py-4 px-5 text-sm font-black outline-none font-sans uppercase tracking-tighter text-admin-bg placeholder:text-admin-bg/40"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[8px] font-black uppercase tracking-widest opacity-40 px-2 underline decoration-2 underline-offset-4">Capacité Maximum</label>
+                                <input
+                                    type="number"
+                                    name="capaciteMax"
+                                    value={formData.capaciteMax}
+                                    onChange={handleChange}
+                                    min={1}
+                                    required
+                                    className="w-full bg-admin-bg/10 border border-white/10 rounded-xl py-4 px-5 text-sm font-black outline-none font-sans text-admin-bg"
                                 />
                             </div>
                         </div>
@@ -139,6 +198,17 @@ export default function CreateEventPage() {
                                     <option key={cat.id} value={cat.id} className="bg-admin-card">{cat.nom}</option>
                                 ))}
                             </select>
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-[8px] font-black text-admin-text-dim uppercase tracking-[0.4em] px-2 italic">URL Image Affiche</label>
+                            <input
+                                type="url"
+                                name="imageAffiche"
+                                value={formData.imageAffiche}
+                                onChange={handleChange}
+                                placeholder="https://exemple.com/image.jpg"
+                                className="w-full bg-admin-inner border border-admin-border rounded-xl py-4 px-7 text-xs font-bold text-white outline-none font-sans placeholder:text-admin-text-dim/50"
+                            />
                         </div>
                     </div>
                 </div>
