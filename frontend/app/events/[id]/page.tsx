@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Event { id: string; titre: string; description: string; dateHeureDebut: string; dateHeureFin: string; lieu: string; prix: number; capaciteMax: number; placesRestantes: number; categorie: { nom: string }; imageAffiche?: string; }
 
@@ -15,7 +16,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     const [reserving, setReserving] = useState(false);
 
     useEffect(() => {
-        api.get(`/events/${id}`).then(res => setEvent(res.data)).catch(err => console.error(err)).finally(() => setLoading(false));
+        api.get(`/events/${id}`).then(res => setEvent(res.data)).finally(() => setLoading(false));
     }, [id]);
 
     const handleReserve = async () => {
@@ -25,9 +26,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
             await api.post('/reservations', { evenementId: id });
             router.push('/reservations');
         }
-        catch (err: any) {
-            if (err.response?.status === 401) router.push('/login');
-            else alert(err.response?.data?.message || 'Erreur lors de la réservation');
+        catch (err: unknown) {
+            const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
+            if (axiosError.response?.status === 401) router.push('/login');
+            else alert(axiosError.response?.data?.message || 'Erreur lors de la réservation');
         }
         finally { setReserving(false); }
     };
@@ -62,7 +64,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="bg-site-card rounded-3xl border border-site-border overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[500px]">
                     <div className="md:w-1/2 relative bg-site-inner overflow-hidden border-r border-site-border">
                         {event.imageAffiche ? (
-                            <img src={event.imageAffiche} alt={event.titre} className="w-full h-full object-cover" />
+                            <Image src={event.imageAffiche} alt={event.titre} fill className="object-cover" unoptimized />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-site-text-dim text-[10px] font-black uppercase tracking-widest opacity-20">No Visual</div>
                         )}
@@ -80,9 +82,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                                     <p className="text-sm font-black text-site-text-main italic">{new Date(event.dateHeureDebut).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                                     <p className="text-xs font-bold text-site-accent">{new Date(event.dateHeureDebut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-[9px] font-black text-site-text-muted uppercase tracking-widest opacity-60 italic">Lieu</p>
-                                    <p className="text-sm font-black text-site-text-main italic uppercase tracking-tight">{event.lieu}</p>
+                            <div className="space-y-1">
+                                    <p className="text-[9px] font-black text-site-text-muted uppercase tracking-widest opacity-60 italic">Prix d&apos;accès</p>
+                                    <p className="text-5xl font-black text-white italic tracking-tighter">{event.prix}€</p>
                                 </div>
                             </div>
                         </div>
@@ -94,7 +96,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
 
                         <div className="pt-10 flex items-center justify-between gap-8">
                             <div className="space-y-1">
-                                <span className="text-[9px] font-black text-site-accent uppercase tracking-widest">Prix d'accès</span>
+                                <span className="text-[9px] font-black text-site-accent uppercase tracking-widest">Prix d&apos;accès</span>
                                 <p className="text-5xl font-black text-white italic tracking-tighter">{event.prix}€</p>
                             </div>
 

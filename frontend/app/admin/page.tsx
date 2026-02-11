@@ -8,8 +8,17 @@ const Icons = {
     Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>,
 };
 
+interface Stats {
+    totalEvents: number;
+    upcomingEvents: number;
+    totalReservations: number;
+    totalConfirmed: number;
+    totalRevenue: number;
+    occupancyRate: number;
+}
+
 export default function AdminDashboard() {
-    const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -25,7 +34,7 @@ export default function AdminDashboard() {
     const cards = [
         { label: 'Total Événements', value: stats?.totalEvents || 0, color: 'text-admin-accent', sub: 'Inscrits en base' },
         { label: 'Tickets Vendus', value: stats?.totalConfirmed || 0, color: 'text-status-success', sub: 'Confirmations OK' },
-        { label: 'Chiffre d\'Affaires', value: `${stats?.totalRevenue || 0}€`, color: 'text-admin-accent', sub: 'Revenus générés' },
+        { label: 'Chiffre d&apos;Affaires', value: `${stats?.totalRevenue || 0}€`, color: 'text-admin-accent', sub: 'Revenus générés' },
         { label: 'Taux Occup.', value: `${stats?.occupancyRate || 0}%`, color: 'text-status-warning', sub: 'Remplissage moyen' },
     ];
 
@@ -34,7 +43,7 @@ export default function AdminDashboard() {
             <header className="flex justify-between items-end">
                 <div className="space-y-1">
                     <h1 className="text-4xl font-black text-admin-text-main tracking-tighter uppercase italic">Dashboard</h1>
-                    <p className="text-admin-text-dim font-bold text-[10px] uppercase tracking-widest px-1">Vue d'ensemble de l'activité</p>
+                    <p className="text-admin-text-dim font-bold text-[10px] uppercase tracking-widest px-1">Vue d&apos;ensemble de l&apos;activité</p>
                 </div>
                 <Link
                     href="/admin/events/create"

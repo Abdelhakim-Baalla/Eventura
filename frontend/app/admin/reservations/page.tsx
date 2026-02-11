@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/api';
 
 const Icons = {
@@ -10,24 +10,32 @@ const Icons = {
     X: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>,
 };
 
+interface Reservation {
+    id: string;
+    statut: string;
+    dateReservation: string;
+    utilisateur: { id: string; nom: string; prenom: string; email: string };
+    evenement: { id: string; titre: string };
+}
+
 export default function AdminReservationsPage() {
-    const [reservations, setReservations] = useState<any[]>([]);
+    const [reservations, setReservations] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
-    useEffect(() => {
-        loadReservations();
+    const loadReservations = useCallback(() => {
+        api.get('/reservations/admin').then(res => { setReservations(res.data); setLoading(false); }).catch(() => setLoading(false));
     }, []);
 
-    const loadReservations = () => {
-        api.get('/reservations/admin').then(res => { setReservations(res.data); setLoading(false); }).catch(() => setLoading(false));
-    };
+    useEffect(() => {
+        loadReservations();
+    }, [loadReservations]);
 
     const handleUpdateStatus = async (id: string, statut: string) => {
         try {
             await api.patch(`/reservations/${id}/status`, { statut });
             loadReservations();
-        } catch (err) { alert('Erreur lors de la mise à jour'); }
+        } catch { alert('Erreur lors de la mise à jour'); }
     };
 
     const filtered = reservations.filter(r =>

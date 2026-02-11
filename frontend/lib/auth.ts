@@ -14,9 +14,22 @@ export interface User {
     dateCreation: string;
 }
 
+export interface LoginResponse {
+    access_token: string;
+    user: User;
+}
+
+export interface RegisterData {
+    email: string;
+    password: string;
+    nom: string;
+    prenom: string;
+    telephone?: string;
+}
+
 export const authService = {
     // Connexion
-    async login(email: string, password: string): Promise<any> {
+    async login(email: string, password: string): Promise<LoginResponse> {
         const response = await api.post('/auth/login', { email, password });
         const { access_token, user } = response.data;
         this.setToken(access_token);
@@ -25,7 +38,7 @@ export const authService = {
     },
 
     // Inscription
-    async register(userData: any): Promise<any> {
+    async register(userData: RegisterData): Promise<{ message: string }> {
         const response = await api.post('/auth/register', userData);
         return response.data;
     },
@@ -46,14 +59,14 @@ export const authService = {
     },
 
     // Stocker les infos utilisateur
-    setUser(user: any): void {
+    setUser(user: User): void {
         if (typeof window !== 'undefined') {
             localStorage.setItem(USER_KEY, JSON.stringify(user));
         }
     },
 
     // Récupérer les infos utilisateur
-    getUser(): any | null {
+    getUser(): User | null {
         if (typeof window !== 'undefined') {
             const user = localStorage.getItem(USER_KEY);
             return user ? JSON.parse(user) : null;

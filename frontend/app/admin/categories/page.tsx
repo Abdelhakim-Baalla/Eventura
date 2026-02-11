@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/api';
 
 const Icons = {
@@ -9,13 +9,22 @@ const Icons = {
     Edit: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /></svg>
 };
 
-export default function AdminCategoriesPage() {
-    const [categories, setCategories] = useState<any[]>([]);
-    const [newCat, setNewCat] = useState('');
-    const [editingCat, setEditingCat] = useState<any>(null);
+interface Category {
+    id: string;
+    nom: string;
+    description?: string;
+}
 
-    useEffect(() => { loadCats(); }, []);
-    const loadCats = () => api.get('/categories').then(res => setCategories(res.data));
+export default function AdminCategoriesPage() {
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [newCat, setNewCat] = useState('');
+    const [editingCat, setEditingCat] = useState<Category | null>(null);
+
+    const loadCats = useCallback(() => {
+        api.get('/categories').then(res => setCategories(res.data));
+    }, []);
+
+    useEffect(() => { loadCats(); }, [loadCats]);
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,7 +37,7 @@ export default function AdminCategoriesPage() {
             setNewCat('');
             setEditingCat(null);
             loadCats();
-        } catch (err) { alert('Erreur'); }
+        } catch { alert('Erreur'); }
     };
 
     const handleDelete = async (id: string) => {
@@ -36,10 +45,10 @@ export default function AdminCategoriesPage() {
         try {
             await api.delete(`/categories/${id}`);
             loadCats();
-        } catch (err) { alert('Erreur lors de la suppression'); }
+        } catch { alert('Erreur lors de la suppression'); }
     };
 
-    const startEdit = (cat: any) => {
+    const startEdit = (cat: Category) => {
         setEditingCat(cat);
         setNewCat(cat.nom);
     };

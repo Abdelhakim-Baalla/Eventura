@@ -15,7 +15,7 @@ export default function ForbiddenPage() {
                 </div>
 
                 <div className="p-6 bg-site-inner border border-site-border rounded-2xl italic text-sm text-site-text-muted">
-                    Votre identifiant actuel n'a pas les autorisations nécessaires pour accéder à cette zone du réseau.
+                    Votre identifiant actuel n&apos;a pas les autorisations nécessaires pour accéder à cette zone du réseau.
                 </div>
 
                 <Link

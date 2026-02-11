@@ -17,7 +17,17 @@ export const metadata: Metadata = {
     title: "Eventura",
     description: "Plateforme de gestion d'événements",
     icons: {
-        icon: "/tab-icon.png",
+        icon: [
+            { url: "/favicon.svg", type: "image/svg+xml" },
+            { url: "/tab-icon.png", type: "image/png", sizes: "any" },
+        ],
+        shortcut: "/tab-icon.png",
+        apple: "/tab-icon.png",
+    },
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "black-translucent",
+        title: "Eventura",
     },
 };
 

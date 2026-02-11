@@ -27,8 +27,9 @@ export default function RegisterPage() {
         try {
             await authService.register(formData);
             router.push('/login');
-        } catch (err: any) {
-            setErrors({ submit: err.response?.data?.message || 'Échec de l\'inscription' });
+        } catch (err: unknown) {
+            const axiosError = err as { response?: { data?: { message?: string } } };
+            setErrors({ submit: axiosError.response?.data?.message || 'Échec de l\'inscription' });
         } finally {
             setLoading(false);
         }
@@ -42,7 +43,7 @@ export default function RegisterPage() {
                 <div className="text-center mb-10">
                     <div className="inline-block w-12 h-12 bg-site-accent rounded-xl flex items-center justify-center text-white font-black text-xl mb-6 shadow-lg shadow-site-accent/20">E</div>
                     <h1 className="text-3xl font-black text-white tracking-tight uppercase italic leading-none">Inscription</h1>
-                    <p className="text-site-text-muted text-[10px] uppercase font-black tracking-widest mt-2 opacity-40">Rejoindre l'univers Eventura</p>
+                    <p className="text-site-text-muted text-[10px] uppercase font-black tracking-widest mt-2 opacity-40">Rejoindre l&apos;univers Eventura</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -80,7 +81,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-site-text-muted uppercase tracking-widest px-2 opacity-60">Code d'accès sécurisé</label>
+                        <label className="text-[10px] font-black text-site-text-muted uppercase tracking-widest px-2 opacity-60">Code d&apos;accès sécurisé</label>
                         <input
                             type="password"
                             value={formData.password}
