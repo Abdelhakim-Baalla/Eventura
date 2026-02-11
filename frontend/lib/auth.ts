@@ -1,0 +1,65 @@
+import api from './api';
+
+const TOKEN_KEY = 'eventura_token';
+const USER_KEY = 'eventura_user';
+
+export const authService = {
+    // Connexion
+    async login(email: string, password: string): Promise<any> {
+        const response = await api.post('/auth/login', { email, password });
+        const { access_token, user } = response.data;
+        this.setToken(access_token);
+        this.setUser(user);
+        return response.data;
+    },
+
+    // Inscription
+    async register(userData: any): Promise<any> {
+        const response = await api.post('/auth/register', userData);
+        return response.data;
+    },
+
+    // Stocker le token
+    setToken(token: string): void {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(TOKEN_KEY, token);
+        }
+    },
+
+    // Récupérer le token
+    getToken(): string | null {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem(TOKEN_KEY);
+        }
+        return null;
+    },
+
+    // Stocker les infos utilisateur
+    setUser(user: any): void {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(USER_KEY, JSON.stringify(user));
+        }
+    },
+
+    // Récupérer les infos utilisateur
+    getUser(): any | null {
+        if (typeof window !== 'undefined') {
+            const user = localStorage.getItem(USER_KEY);
+            return user ? JSON.parse(user) : null;
+        }
+        return null;
+    },
+
+    // Vérifier si l'utilisateur est connecté
+    isAuthenticated(): boolean {
+        return this.getToken() !== null;
+    },
+
+    // Déconnexion
+    logout(): void {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem(TOKEN_KEY);
+            localStorage.removeItem(USER_KEY);
+        }
+    },
+};
