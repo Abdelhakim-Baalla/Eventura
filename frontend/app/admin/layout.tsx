@@ -17,7 +17,7 @@ const Icons = {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
-    const [user, setUser] = useState<User | null>(null);
+    const [user] = useState<User | null>(() => authService.getUser());
     const [mounted, setMounted] = useState(false);
     const initializedRef = useRef(false);
 
@@ -25,14 +25,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         if (initializedRef.current) return;
         initializedRef.current = true;
 
-        const currentUser = authService.getUser();
-        setUser(currentUser);
-        setMounted(true);
+        // Utiliser queueMicrotask pour éviter l'appel setState synchrone
+        queueMicrotask(() => {
+            setMounted(true);
+        });
 
-        if (!currentUser || (currentUser.role !== 'ADMIN' && currentUser.role !== 'SUPER_ADMIN')) {
+        if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
             router.push('/login');
         }
-    }, [router]);
+    }, [router, user]);
 
     const menuItems = [
         { name: 'Dashboard', path: '/admin', icon: Icons.Dashboard },
