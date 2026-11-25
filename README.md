@@ -1,5 +1,7 @@
 # 📝 Guide de Documentation Technique : Eventura
 
+[Scénario de réservation](https://github.com/Abdelhakim-Baalla/Eventura/blob/main/backend/test/flow.e2e-spec.ts)
+
 ![Backend CI](https://github.com/Abdelhakim-Baalla/Eventura/workflows/Backend%20CI/badge.svg)
 ![Frontend CI](https://github.com/Abdelhakim-Baalla/Eventura/workflows/Frontend%20CI/badge.svg)
 ![Docker CD](https://github.com/Abdelhakim-Baalla/Eventura/workflows/Docker%20CD/badge.svg)
