@@ -1,6 +1,14 @@
 import axios, { AxiosError } from 'axios';
-import events from './events.json';
+import fixtures from './events.json';
 import { authService } from './auth';
+
+// Keep the fictional sessions bookable when someone opens the portfolio in a later year.
+const year = String(new Date().getUTCFullYear() + 1);
+const events = fixtures.map(event => ({
+  ...event,
+  dateHeureDebut: year + event.dateHeureDebut.slice(4),
+  dateHeureFin: year + event.dateHeureFin.slice(4),
+}));
 
 type Ticket = {
   id: string; referenceTicket: string; statut: 'EN_ATTENTE' | 'ANNULE';
