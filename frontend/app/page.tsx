@@ -50,7 +50,7 @@ export default function Home() {
 
           <div className="hidden md:flex items-center gap-10">
             <NavLink href="/" pathname={pathname}>Accueil</NavLink>
-            <NavLink href="/explore" pathname={pathname}>Explorer</NavLink>
+            <NavLink href="/#catalogue" pathname={pathname}>Explorer</NavLink>
             {user && <NavLink href="/reservations" pathname={pathname}>Mes Tickets</NavLink>}
           </div>
 
@@ -60,7 +60,7 @@ export default function Home() {
                 {(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
                   <Link href="/admin" className="text-[10px] font-black uppercase tracking-widest text-admin-accent border border-admin-accent/30 px-4 py-1.5 rounded-lg hover:bg-admin-accent hover:text-admin-bg transition-all">Console Admin</Link>
                 )}
-                <button onClick={handleLogout} className="text-[10px] font-black uppercase tracking-widest text-status-error/70 hover:text-status-error transition-colors">Sortie</button>
+                <button onClick={handleLogout} className="text-[10px] font-black uppercase tracking-widest text-status-error/70 hover:text-status-error transition-colors">{process.env.NEXT_PUBLIC_PORTFOLIO ? 'Réinitialiser la démo' : 'Sortie'}</button>
               </div>
             ) : (
               <div className="flex items-center gap-4">
@@ -79,7 +79,7 @@ export default function Home() {
           <div className="max-w-2xl space-y-8 animate-fade-in">
             <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-site-inner border border-site-border">
               <span className="w-2 h-2 bg-site-accent rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.8)]"></span>
-              <span className="text-[10px] font-black uppercase tracking-widest text-site-text-muted">Système de réservation actif</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-site-text-muted">{process.env.NEXT_PUBLIC_PORTFOLIO ? 'Démo · Réservations simulées dans cet onglet' : 'Système de réservation actif'}</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-black tracking-tighter uppercase italic leading-[0.9]">
               Rejoignez les meilleures <br /><span className="text-site-accent underline decoration-site-accent/30 decoration-8 underline-offset-8">sessions du réseau.</span>
@@ -102,7 +102,7 @@ export default function Home() {
       </header>
 
       {/* Structured Grid */}
-      <main className="max-w-7xl mx-auto px-6 py-20 pb-48">
+      <main id="catalogue" className="max-w-7xl mx-auto px-6 py-20 pb-48">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6 border-b border-site-border pb-10">
           <div className="space-y-1">
             <h2 className="text-4xl font-black uppercase italic tracking-tighter">Catalogue Unit</h2>

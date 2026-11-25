@@ -1,5 +1,11 @@
 # 📝 Guide de Documentation Technique : Eventura
 
+[Réserver un billet fictif](https://baalla-eventura-demo.abdelhakimbaalla50.workers.dev)
+
+Choisir un événement, réserver un billet et le retrouver dans « Mes Tickets ». Les réservations de démonstration restent dans l’onglet.
+
+Pour reconstruire la démo depuis la racine du dépôt, exécuter `cd frontend && npm ci && npx next build portfolio --webpack`. Depuis la racine, `npx wrangler deploy` publie les fichiers générés.
+
 [Scénario de réservation](https://github.com/Abdelhakim-Baalla/Eventura/blob/main/backend/test/flow.e2e-spec.ts)
 
 ![Backend CI](https://github.com/Abdelhakim-Baalla/Eventura/workflows/Backend%20CI/badge.svg)

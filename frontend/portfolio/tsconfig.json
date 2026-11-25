@@ -1,0 +1,5 @@
+{
+  "extends":"../tsconfig.json",
+  "compilerOptions":{"paths":{"@/lib/api":["./api.ts"],"@/lib/auth":["./auth.ts"],"@/*":["../*"]}},
+  "include":["app/**/*.tsx","*.ts",".next/types/**/*.ts"]
+}

@@ -1,0 +1,4 @@
+[
+  {"id":"atelier-web","titre":"Atelier Web à Agadir","description":"Une journée de démonstrations et de discussions sur les applications web.","dateHeureDebut":"2027-03-12T09:00:00Z","dateHeureFin":"2027-03-12T17:00:00Z","lieu":"Agadir","prix":0,"capaciteMax":60,"placesRestantes":24,"categorie":{"nom":"Technologie"}},
+  {"id":"photo-atlas","titre":"Regards sur l’Atlas","description":"Rencontre autour de la photographie de paysage et du récit de voyage.","dateHeureDebut":"2027-04-18T10:00:00Z","dateHeureFin":"2027-04-18T13:00:00Z","lieu":"Marrakech","prix":80,"capaciteMax":30,"placesRestantes":8,"categorie":{"nom":"Photographie"}}
+]

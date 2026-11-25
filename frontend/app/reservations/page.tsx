@@ -31,7 +31,7 @@ export default function MyReservationsPage() {
 
     const handleCancel = async (id: string) => {
         if (!confirm('Voulez-vous annuler l\'accès ?')) return;
-        try { await api.patch(`/reservations/${id}/cancel`); setFilter('ALL'); } catch { alert('Erreur'); }
+        try { await api.patch(`/reservations/${id}/cancel`); setReservations(items => items.map(item => item.id === id ? { ...item, statut: 'ANNULE' } : item)); setFilter('ALL'); } catch { alert('Erreur'); }
     };
 
     return (
